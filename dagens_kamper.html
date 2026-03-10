@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Dagens kamper</title>
+  <style>
+    :root{
+      color-scheme: light;
+      --bgTop:#243048;
+      --bg:#edf1f5;
+      --card:#f7f8fa;
+      --card2:#f2f4f7;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(31,41,55,.08);
+      --shadow:0 7px 18px rgba(15,23,42,.06);
+      --radius:16px;
+
+      --live:#22c55e;
+      --liveBg:#edf9f1;
+      --liveBorder:rgba(34,197,94,.18);
+
+      --toggleBg:rgba(255,255,255,.10);
+      --toggleBorder:rgba(255,255,255,.14);
+
+      --mizunoBg:rgba(59,130,246,.10);
+      --mizunoBorder:rgba(59,130,246,.18);
+      --mizunoText:#2563eb;
+
+      --abroadBg:rgba(245,158,11,.10);
+      --abroadBorder:rgba(245,158,11,.18);
+      --abroadText:#b45309;
+
+      --statusBg:#eef2f7;
+      --scoreBg:#f1f4f7;
+    }
+
+    body.dark{
+      color-scheme: dark;
+      --bgTop:#1f2937;
+      --bg:#2b3442;
+      --card:#364152;
+      --card2:#313b4b;
+      --text:#e7ebf1;
+      --muted:#b3bdc9;
+      --line:rgba(255,255,255,.08);
+      --shadow:0 7px 18px rgba(0,0,0,.14);
+
+      --live:#4ade80;
+      --liveBg:rgba(74,222,128,.12);
+      --liveBorder:rgba(74,222,128,.16);
+
+      --toggleBg:rgba(255,255,255,.07);
+      --toggleBorder:rgba(255,255,255,.10);
+
+      --mizunoBg:rgba(59,130,246,.12);
+      --mizunoBorder:rgba(96,165,250,.18);
+      --mizunoText:#93c5fd;
+
+      --abroadBg:rgba(245,158,11,.12);
+      --abroadBorder:rgba(251,191,36,.16);
+      --abroadText:#fbbf24;
+
+      --statusBg:#303a49;
+      --scoreBg:#303a49;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(180deg,var(--bgTop) 0%,var(--bgTop) 98px,var(--bg) 98px,var(--bg) 100%);
+      color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+      transition:background-color .2s ease,color .2s ease;
+    }
+
+    header{
+      max-width:980px;
+      margin:0 auto;
+      padding:12px 10px 10px;
+      color:#fff;
+    }
+    .headRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .headLeft{min-width:0}
+    .headRight{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+      flex:0 0 auto;
+    }
+    h1{
+      margin:0;
+      font-size:17px;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .sub{
+      margin:4px 0 0;
+      font-size:11px;
+      line-height:1.25;
+      color:rgba(255,255,255,.78);
+    }
+    .lastUpdated{
+      font-size:10px;
+      white-space:nowrap;
+      color:rgba(255,255,255,.75);
+      text-align:right;
+    }
+
+.headButtons{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+}
+
+.navIcon,
+.themeToggle{
+  appearance:none;
+  border:1px solid var(--toggleBorder);
+  background:var(--toggleBg);
+  color:#fff;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  backdrop-filter:blur(6px);
+  font-size:15px;
+  font-weight:900;
+  line-height:1;
+  flex:0 0 auto;
+  cursor:pointer;
+  padding:0;
+}
+
+.navIcon:active,
+.themeToggle:active{
+  transform:scale(.98);
+}
+
+    main{
+      max-width:980px;
+      margin:0 auto;
+      padding:10px;
+    }
+
+    .summaryBar{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .summaryItem{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      box-shadow:var(--shadow);
+    }
+    .summaryLabel{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+    .summaryValue{
+      margin-top:4px;
+      font-size:20px;
+      font-weight:950;
+      line-height:1;
+    }
+
+    .section{
+      margin-top:14px;
+    }
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:0 0 8px;
+    }
+    .sectionTitle h2{
+      margin:0;
+      font-size:14px;
+      font-weight:900;
+    }
+    .sectionCount{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .grid{
+      display:grid;
+      gap:8px;
+      grid-template-columns:1fr;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      box-shadow:var(--shadow);
+    }
+
+    .topRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .leagueBlock{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .league{
+      font-size:11px;
+      font-weight:900;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .meta{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .statusPill{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:900;
+      border:1px solid var(--line);
+      background:var(--statusBg);
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .statusPill.live{
+      background:var(--liveBg);
+      border-color:var(--liveBorder);
+      color:var(--live);
+    }
+    .dot{
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:var(--live);
+      flex:0 0 auto;
+    }
+
+    .matchRow{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:8px;
+      align-items:center;
+    }
+    .team{
+      min-width:0;
+      text-align:center;
+    }
+    .teamLogoWrap{
+      width:42px;
+      height:42px;
+      margin:0 auto 6px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:var(--card2);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .teamLogoWrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      padding:4px;
+    }
+    .teamLogoFallback{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+    }
+    .teamName{
+      font-size:12px;
+      font-weight:900;
+      line-height:1.15;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
+    }
+    .teamCountry{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .centerCol{
+      min-width:92px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      background:var(--scoreBg);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px 6px;
+    }
+    .time{
+      font-size:18px;
+      font-weight:950;
+      line-height:1;
+      font-variant-numeric:tabular-nums;
+    }
+    .dateLine{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-align:center;
+      line-height:1.1;
+    }
+
+    .badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      justify-content:center;
+      margin-top:8px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:3px 7px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900;
+      line-height:1;
+      text-transform:uppercase;
+    }
+    .badge.mizuno{
+      background:var(--mizunoBg);
+      border:1px solid var(--mizunoBorder);
+      color:var(--mizunoText);
+    }
+    .badge.abroad{
+      background:var(--abroadBg);
+      border:1px solid var(--abroadBorder);
+      color:var(--abroadText);
+    }
+
+    .empty{
+      padding:16px;
+      border-radius:16px;
+      text-align:center;
+      background:var(--card);
+      border:1px dashed var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (min-width:700px){
+      .grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:420px){
+      .summaryValue{ font-size:18px; }
+      .card{ padding:9px; }
+      .teamName{ font-size:11px; }
+      .time{ font-size:16px; }
+      .centerCol{ min-width:84px; }
+      .teamLogoWrap{
+        width:36px;
+        height:36px;
+        margin-bottom:5px;
+        border-radius:10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="headRow">
+      <div class="headLeft">
+        <h1>Dagens kamper</h1>
+        <p class="sub">Kun kamper der teams.sofascore_team_id matcher events.home_team_id eller away_team_id</p>
+      </div>
+      <div class="headRight">
+<div class="headButtons">
+  <a class="navIcon" href="live-index.html" title="Live" aria-label="Live">🏐</a>
+  <a class="navIcon" href="dagens_kamper.html" title="Dagens kamper" aria-label="Dagens kamper">📅</a>
+  <a class="navIcon" href="lag.html" title="Lag" aria-label="Lag">⭐</a>
+  <a class="navIcon" href="lag.html" title="Spillere" aria-label="Spillere">👤</a>
+  <button id="themeToggle" class="themeToggle" type="button" aria-label="Bytt tema" title="Bytt dag/natt">🌙</button>
+</div>
+        <div id="lastUpdated" class="lastUpdated"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="summaryBar">
+      <div class="summaryItem">
+        <div class="summaryLabel">Live</div>
+        <div id="summaryLive" class="summaryValue">0</div>
+      </div>
+      <div class="summaryItem">
+        <div class="summaryLabel">Senere i dag</div>
+        <div id="summaryUpcoming" class="summaryValue">0</div>
+      </div>
+      <div class="summaryItem">
+        <div class="summaryLabel">Ferdig</div>
+        <div id="summaryFinished" class="summaryValue">0</div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="sectionTitle">
+        <h2>Live nå</h2>
+        <div id="countLive" class="sectionCount">0 kamper</div>
+      </div>
+      <div id="liveGrid" class="grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="sectionTitle">
+        <h2>Senere i dag</h2>
+        <div id="countUpcoming" class="sectionCount">0 kamper</div>
+      </div>
+      <div id="upcomingGrid" class="grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="sectionTitle">
+        <h2>Ferdig / tidligere i dag</h2>
+        <div id="countFinished" class="sectionCount">0 kamper</div>
+      </div>
+      <div id="finishedGrid" class="grid"></div>
+    </section>
+  </main>
+
+  <script>
+    const TEAMS_API_URL = "https://volleyball.ronesse.no/teams?limit=200&offset=0";
+    const EVENTS_API_BASE = "https://volleyball.ronesse.no/events";
+    const TEAM_LOGO_BASE = "https://volleyball.ronesse.no/img/teams";
+    const THEME_KEY = "volley_theme_v1";
+
+    let favoriteSofaTeamIds = new Set();
+    let favoriteTeamMetaBySofaId = new Map();
+    let todayMatches = [];
+
+    function loadTheme(){
+      try { return localStorage.getItem(THEME_KEY) || ""; }
+      catch { return ""; }
+    }
+
+    function saveTheme(theme){
+      try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    }
+
+    function applyTheme(theme){
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      const btn = document.getElementById("themeToggle");
+      btn.textContent = dark ? "☀️" : "🌙";
+      btn.title = dark ? "Bytt til dagmodus" : "Bytt til nattmodus";
+      btn.setAttribute("aria-label", btn.title);
+    }
+
+    function initTheme(){
+      const saved = loadTheme();
+      if (saved === "dark" || saved === "light"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme(){
+      const next = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      saveTheme(next);
+    }
+
+    function setLastUpdated(text){
+      document.getElementById("lastUpdated").textContent = text;
+    }
+
+    async function getJson(url){
+      const res = await fetch(url, {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    async function fetchTeams(){
+      const data = await getJson(TEAMS_API_URL);
+      return Array.isArray(data) ? data : [];
+    }
+
+    function buildFavoriteTeams(teams){
+      const ids = new Set();
+      const meta = new Map();
+
+      for (const team of teams){
+        const group = String(team.group_type || "").toLowerCase();
+        const sofaId = String(team.sofascore_team_id ?? "").trim();
+
+        if (!sofaId) continue;
+        if (group !== "mizuno" && group !== "abroad") continue;
+
+        ids.add(sofaId);
+
+        if (!meta.has(sofaId)){
+          meta.set(sofaId, []);
+        }
+
+        meta.get(sofaId).push({
+          sofaId,
+          internalId: String(team.id ?? ""),
+          name: team.name || "",
+          country: team.country || "",
+          league: team.league || "",
+          groupType: group,
+          logo: team.logo || ""
+        });
+      }
+
+      favoriteSofaTeamIds = ids;
+      favoriteTeamMetaBySofaId = meta;
+    }
+
+    function getTodayRangeSeconds(){
+      const now = new Date();
+      const start = new Date(now);
+      start.setHours(0,0,0,0);
+      const end = new Date(now);
+      end.setHours(23,59,59,999);
+
+      return {
+        fromTs: Math.floor(start.getTime() / 1000),
+        toTs: Math.floor(end.getTime() / 1000)
+      };
+    }
+
+    async function fetchTodayEvents(){
+      const { fromTs, toTs } = getTodayRangeSeconds();
+      const url = new URL(EVENTS_API_BASE);
+      url.searchParams.set("from_ts", String(fromTs));
+      url.searchParams.set("to_ts", String(toTs));
+      url.searchParams.set("limit", "500");
+      url.searchParams.set("offset", "0");
+
+      const data = await getJson(url.toString());
+      return Array.isArray(data) ? data : [];
+    }
+
+    function getEventDate(event){
+      if (event.start_ts != null){
+        const n = Number(event.start_ts);
+        if (!Number.isNaN(n)) return new Date(n * 1000);
+      }
+
+      if (event.start_utc){
+        const d = new Date(String(event.start_utc).replace(" ", "T"));
+        if (!Number.isNaN(d.getTime())) return d;
+      }
+
+      return null;
+    }
+
+    function getEventState(event){
+      const statusType = String(event.status_type || "").toLowerCase();
+
+      if (statusType === "inprogress") return "live";
+      if (statusType === "finished") return "finished";
+      if (statusType === "notstarted") return "upcoming";
+
+      const d = getEventDate(event);
+      if (!d) return "upcoming";
+      return d > new Date() ? "upcoming" : "finished";
+    }
+
+    function isFavoriteEvent(event){
+      const homeId = String(event.home_team_id ?? "");
+      const awayId = String(event.away_team_id ?? "");
+      return favoriteSofaTeamIds.has(homeId) || favoriteSofaTeamIds.has(awayId);
+    }
+
+    function enrichEvent(event){
+      const homeId = String(event.home_team_id ?? "");
+      const awayId = String(event.away_team_id ?? "");
+
+      const linkedTeams = [];
+      const badges = new Set();
+
+      if (favoriteTeamMetaBySofaId.has(homeId)){
+        for (const item of favoriteTeamMetaBySofaId.get(homeId)){
+          linkedTeams.push(item);
+          badges.add(item.groupType);
+        }
+      }
+
+      if (favoriteTeamMetaBySofaId.has(awayId)){
+        for (const item of favoriteTeamMetaBySofaId.get(awayId)){
+          linkedTeams.push(item);
+          badges.add(item.groupType);
+        }
+      }
+
+      return {
+        ...event,
+        linkedTeams,
+        badges: Array.from(badges)
+      };
+    }
+
+    function dedupeEventsById(events){
+      const seen = new Set();
+      const out = [];
+
+      for (const event of events){
+        const id = String(event.event_id ?? "");
+        if (!id) continue;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        out.push(event);
+      }
+
+      return out;
+    }
+
+    function formatTime(date){
+      if (!date) return "--:--";
+      return date.toLocaleTimeString("no-NO", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function formatDateLine(date){
+      if (!date) return "";
+      return date.toLocaleDateString("no-NO", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit"
+      });
+    }
+
+    function getStatusLabel(event){
+      const statusType = String(event.status_type || "").toLowerCase();
+      const statusDesc = String(event.status_desc || "").trim();
+
+      if (statusType === "inprogress") return statusDesc || "LIVE";
+      if (statusType === "finished") return "Ferdig";
+      if (statusType === "notstarted") return "Planlagt";
+      return statusDesc || "Kamp";
+    }
+
+    function createBadge(text){
+      const badge = document.createElement("div");
+      badge.className = `badge ${text}`;
+      badge.textContent = text;
+      return badge;
+    }
+
+    function getTeamCountryText(eventSideId){
+      const arr = favoriteTeamMetaBySofaId.get(String(eventSideId)) || [];
+      const countries = [...new Set(arr.map(x => x.country).filter(Boolean))];
+      return countries.join(" · ");
+    }
+
+    function teamLogoUrl(teamId){
+      return `${TEAM_LOGO_BASE}/${teamId}.png`;
+    }
+
+    function createTeamLogo(teamId, fallbackText = ""){
+      const wrap = document.createElement("div");
+      wrap.className = "teamLogoWrap";
+
+      const img = document.createElement("img");
+      img.alt = "Laglogo";
+      img.loading = "lazy";
+      img.src = teamLogoUrl(teamId);
+
+      img.onerror = () => {
+        wrap.innerHTML = "";
+        const fb = document.createElement("div");
+        fb.className = "teamLogoFallback";
+        fb.textContent = fallbackText;
+        wrap.appendChild(fb);
+      };
+
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function renderCard(event){
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const date = getEventDate(event);
+      const state = getEventState(event);
+      const statusLabel = getStatusLabel(event);
+
+      const top = document.createElement("div");
+      top.className = "topRow";
+
+      const leagueBlock = document.createElement("div");
+      leagueBlock.className = "leagueBlock";
+
+      const league = document.createElement("div");
+      league.className = "league";
+      league.textContent = event.tournament_name || "Kamp";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = `${event.season_name || ""}${event.round ? ` · Runde ${event.round}` : ""}`.trim() || "Dagens kamp";
+
+      leagueBlock.appendChild(league);
+      leagueBlock.appendChild(meta);
+
+      const status = document.createElement("div");
+      status.className = "statusPill" + (state === "live" ? " live" : "");
+      if (state === "live"){
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        status.appendChild(dot);
+      }
+      const statusText = document.createElement("span");
+      statusText.textContent = statusLabel;
+      status.appendChild(statusText);
+
+      top.appendChild(leagueBlock);
+      top.appendChild(status);
+
+      const matchRow = document.createElement("div");
+      matchRow.className = "matchRow";
+
+      const home = document.createElement("div");
+      home.className = "team";
+      home.appendChild(createTeamLogo(event.home_team_id, "H"));
+      home.insertAdjacentHTML("beforeend", `
+        <div class="teamName">${event.home_team_name || "Hjemmelag"}</div>
+        <div class="teamCountry">${getTeamCountryText(event.home_team_id)}</div>
+      `);
+
+      const center = document.createElement("div");
+      center.className = "centerCol";
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = state === "live"
+        ? `${event.home_sets ?? 0}-${event.away_sets ?? 0}`
+        : formatTime(date);
+
+      const dateLine = document.createElement("div");
+      dateLine.className = "dateLine";
+      dateLine.textContent = state === "live"
+        ? (event.status_desc || "LIVE")
+        : formatDateLine(date);
+
+      center.appendChild(time);
+      center.appendChild(dateLine);
+
+      const away = document.createElement("div");
+      away.className = "team";
+      away.appendChild(createTeamLogo(event.away_team_id, "B"));
+      away.insertAdjacentHTML("beforeend", `
+        <div class="teamName">${event.away_team_name || "Bortelag"}</div>
+        <div class="teamCountry">${getTeamCountryText(event.away_team_id)}</div>
+      `);
+
+      matchRow.appendChild(home);
+      matchRow.appendChild(center);
+      matchRow.appendChild(away);
+
+      const badges = document.createElement("div");
+      badges.className = "badges";
+      event.badges.forEach(b => badges.appendChild(createBadge(b)));
+
+      card.appendChild(top);
+      card.appendChild(matchRow);
+      if (event.badges.length) card.appendChild(badges);
+
+      return card;
+    }
+
+    function renderSection(containerId, countId, items, emptyText){
+      const container = document.getElementById(containerId);
+      const countEl = document.getElementById(countId);
+
+      container.innerHTML = "";
+      countEl.textContent = `${items.length} ${items.length === 1 ? "kamp" : "kamper"}`;
+
+      if (!items.length){
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = emptyText;
+        container.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => container.appendChild(renderCard(item)));
+    }
+
+    function renderSummary(live, upcoming, finished){
+      document.getElementById("summaryLive").textContent = String(live.length);
+      document.getElementById("summaryUpcoming").textContent = String(upcoming.length);
+      document.getElementById("summaryFinished").textContent = String(finished.length);
+    }
+
+    function renderAll(){
+      const live = [];
+      const upcoming = [];
+      const finished = [];
+
+      const sorted = todayMatches.slice().sort((a, b) => {
+        const ad = getEventDate(a)?.getTime() ?? 0;
+        const bd = getEventDate(b)?.getTime() ?? 0;
+        return ad - bd;
+      });
+
+      for (const event of sorted){
+        const state = getEventState(event);
+        if (state === "live") live.push(event);
+        else if (state === "upcoming") upcoming.push(event);
+        else finished.push(event);
+      }
+
+      finished.sort((a, b) => (getEventDate(b)?.getTime() ?? 0) - (getEventDate(a)?.getTime() ?? 0));
+
+      renderSummary(live, upcoming, finished);
+      renderSection("liveGrid", "countLive", live, "Ingen livekamper akkurat nå.");
+      renderSection("upcomingGrid", "countUpcoming", upcoming, "Ingen flere kamper senere i dag.");
+      renderSection("finishedGrid", "countFinished", finished, "Ingen ferdige kamper i dag.");
+    }
+
+    async function refresh(){
+      try {
+        const [teams, events] = await Promise.all([
+          fetchTeams(),
+          fetchTodayEvents()
+        ]);
+
+        buildFavoriteTeams(teams);
+
+        todayMatches = dedupeEventsById(
+          events
+            .filter(isFavoriteEvent)
+            .map(enrichEvent)
+        );
+
+        renderAll();
+
+        setLastUpdated(
+          `Oppdatert ${new Date().toLocaleTimeString("no-NO", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          })}`
+        );
+      } catch (err) {
+        for (const id of ["liveGrid", "upcomingGrid", "finishedGrid"]){
+          document.getElementById(id).innerHTML =
+            `<div class="empty">Kunne ikke hente dagens kamper (${err.message}).</div>`;
+        }
+        document.getElementById("summaryLive").textContent = "0";
+        document.getElementById("summaryUpcoming").textContent = "0";
+        document.getElementById("summaryFinished").textContent = "0";
+        document.getElementById("countLive").textContent = "0 kamper";
+        document.getElementById("countUpcoming").textContent = "0 kamper";
+        document.getElementById("countFinished").textContent = "0 kamper";
+        setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
+      }
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+    initTheme();
+    refresh();
+    setInterval(refresh, 60000);
+  </script>
+</body>
+</html>
