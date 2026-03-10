@@ -1,765 +1,1814 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="no">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Volleyball Live & Hub</title>
-
-  <!-- React + Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Live volleyball</title>
   <style>
-    /* =========
-       Tema-variabler
-       ========= */
-    :root {
-      --bg: #f6f7f9;
-      --card: #ffffff;
-      --border: #e5e6eb;
-      --text: #111827;
-      --muted: #6b7280;
-      --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-      --radius: 16px;
+    :root{
+      color-scheme: light;
+      --bgTop:#243048;
+      --bg:#edf1f5;
+      --card:#f7f8fa;
+      --card2:#f2f4f7;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(31,41,55,.08);
+      --shadow:0 7px 18px rgba(15,23,42,.06);
+      --radius:15px;
+
+      --live:#22c55e;
+      --liveBg:#edf9f1;
+      --liveBorder:rgba(34,197,94,.18);
+
+      --pill:#f1f4f7;
+      --pillActive:#dbe7f6;
+
+      --tabBg:rgba(255,255,255,.10);
+      --tabBorder:rgba(255,255,255,.16);
+
+      --dangerBg:#f8eded;
+      --dangerBorder:rgba(220,38,38,.16);
+      --dangerText:#7f1d1d;
+
+      --primaryBg:#e9f0f9;
+      --primaryBorder:rgba(37,99,235,.18);
+
+      --scoreBg:#f1f4f7;
+      --toggleBg:rgba(255,255,255,.10);
+      --toggleBorder:rgba(255,255,255,.14);
+
+      --autoBadgeBg:rgba(245,158,11,.10);
+      --autoBadgeBorder:rgba(245,158,11,.18);
+      --autoBadgeText:#b45309;
     }
 
-    body[data-theme="dark"] {
-      --bg:#020617;
-      --card:#020617;
-      --border:#1f2937;
-      --text:#e5e7eb;
-      --muted:#9ca3af;
+    body.dark{
+      color-scheme: dark;
+      --bgTop:#1f2937;
+      --bg:#2b3442;
+      --card:#364152;
+      --card2:#313b4b;
+      --text:#e7ebf1;
+      --muted:#b3bdc9;
+      --line:rgba(255,255,255,.08);
+      --shadow:0 7px 18px rgba(0,0,0,.14);
+
+      --live:#4ade80;
+      --liveBg:rgba(74,222,128,.12);
+      --liveBorder:rgba(74,222,128,.16);
+
+      --pill:#3a4658;
+      --pillActive:#44546d;
+
+      --tabBg:rgba(255,255,255,.07);
+      --tabBorder:rgba(255,255,255,.10);
+
+      --dangerBg:rgba(220,38,38,.10);
+      --dangerBorder:rgba(248,113,113,.18);
+      --dangerText:#fecaca;
+
+      --primaryBg:rgba(96,165,250,.12);
+      --primaryBorder:rgba(96,165,250,.20);
+
+      --scoreBg:#303a49;
+      --toggleBg:rgba(255,255,255,.07);
+      --toggleBorder:rgba(255,255,255,.10);
+
+      --autoBadgeBg:rgba(245,158,11,.10);
+      --autoBadgeBorder:rgba(245,158,11,.16);
+      --autoBadgeText:#fbbf24;
     }
 
-    * {
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(180deg,var(--bgTop) 0%,var(--bgTop) 98px,var(--bg) 98px,var(--bg) 100%);
+      color:var(--text);
+      -webkit-tap-highlight-color:transparent;
     }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+    header{
+      max-width:980px;
+      margin:0 auto;
+      padding:11px 9px 9px;
+      color:#fff;
     }
-
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    h1 {
-      margin: 6px 0 14px;
-      font-size: 28px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    @media (max-width: 480px) {
-      .wrap {
-        padding: 10px;
-        padding-top: 10px;
-      }
-      h1 {
-        margin: 2px 0 6px;
-        font-size: 22px;
-      }
-    }
-
-    /* =========
-       Topp-header + faner
-       ========= */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .tabBtn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .tabBtn.active {
-      background: #111827;
-      color: #ffffff;
-      border-color: #111827;
-    }
-
-    .view {
-      display: none;
-    }
-    .view.active {
-      display: block;
-    }
-
-    /* =========
-       Felles UI-elementer
-       ========= */
-    .topbar{
+    .headRow{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:12px;
-      flex-wrap:wrap;
-    }
-
-    .badges{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    .badge{
-      display:inline-flex;
-      gap:6px;
-      align-items:center;
-      padding:6px 10px;
-      font-size:12px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:#fafafa;
-      user-select:none;
-      white-space:nowrap;
-      color:var(--text);
-    }
-
-    .dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      background:#22c55e;
-      display:inline-block;
-    }
-    .dot.gray{ background:#9ca3af; }
-
-    .controls{
-      display:flex;
       gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
     }
-
-    input{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px 12px;
-      outline:none;
-      font-size:14px;
-      background:#ffffff;
-    }
-
-    .alert{
-      margin-top:12px;
-      padding:12px;
-      border:1px solid #f2b8b8;
-      background:#fff5f5;
-      border-radius:12px;
-      color:#7f1d1d;
-    }
-
-    .nav,
-    .subnav{
+    .headLeft{min-width:0}
+    .headRight{
       display:flex;
+      flex-direction:column;
+      align-items:flex-end;
       gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
+      flex:0 0 auto;
+    }
+    h1{
+      margin:0;
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .sub{
+      margin:3px 0 0;
+      font-size:10px;
+      line-height:1.2;
+      color:rgba(255,255,255,.78);
+    }
+    .lastUpdated{
+      font-size:10px;
+      white-space:nowrap;
+      color:rgba(255,255,255,.75);
+      text-align:right;
     }
 
-    .btn{
-      border:1px solid var(--border);
-      background:#ffffff;
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:12px;
-      font-weight:850;
+.headButtons{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+}
+
+.navIcon,
+.themeToggle{
+  appearance:none;
+  border:1px solid var(--toggleBorder);
+  background:var(--toggleBg);
+  color:#fff;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  backdrop-filter:blur(6px);
+  font-size:15px;
+  font-weight:900;
+  line-height:1;
+  flex:0 0 auto;
+  cursor:pointer;
+  padding:0;
+}
+
+.navIcon:active,
+.themeToggle:active{
+  transform:scale(.98);
+}
+
+    .tabs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:7px;
+      margin-top:9px;
+    }
+    .tab{
+      appearance:none;
+      border:1px solid var(--tabBorder);
+      background:var(--tabBg);
+      color:#fff;
+      padding:9px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
       cursor:pointer;
-      user-select:none;
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
       white-space:nowrap;
-      text-decoration:none;
-      color:#111827;
     }
-    .btn.primary{
-      background:#111827;
-      color:#ffffff;
-      border-color:#111827;
+    .tab.active{
+      background:rgba(255,255,255,.88);
+      color:#1f2937;
+      border-color:rgba(255,255,255,.35);
     }
-    .btn:active{
-      transform: translateY(1px);
+
+    main{
+      max-width:980px;
+      margin:0 auto;
+      padding:9px 9px 16px;
     }
 
     .grid{
       display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-      margin-top:14px;
+      gap:7px;
     }
+    .grid.all{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .grid.selected.selected-1,
+    .grid.selected.selected-2{ grid-template-columns:1fr; }
+    .grid.selected.selected-4,
+    .grid.selected.selected-6,
+    .grid.selected.selected-8plus{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 
     .card{
       background:var(--card);
-      border:1px solid var(--border);
+      border:1px solid var(--line);
       border-radius:var(--radius);
-      padding:14px;
       box-shadow:var(--shadow);
-    }
-
-    .row{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-
-    .left{
-      display:flex;
-      align-items:center;
-      gap:12px;
+      overflow:hidden;
       min-width:0;
-      flex:1 1 620px;
     }
 
-    .logoBox{
-      width:44px;
-      height:44px;
-      border-radius:12px;
-      background:#e5e7eb;
-      border:1px solid var(--border);
+    .empty{
+      padding:16px;
+      border-radius:15px;
+      text-align:center;
+      background:var(--card);
+      border:1px dashed var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:var(--card2);
+      color:var(--text);
+      padding:6px 9px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:900;
+      cursor:pointer;
+      min-height:30px;
+    }
+    .btn.primary{
+      background:var(--primaryBg);
+      border-color:var(--primaryBorder);
+    }
+    .btn.danger{
+      background:var(--dangerBg);
+      border-color:var(--dangerBorder);
+      color:var(--dangerText);
+    }
+    .btn.full{width:100%}
+
+    .logoWrap{
+      border-radius:11px;
+      border:1px solid var(--line);
+      background:var(--card2);
+      display:grid;
+      place-items:center;
       overflow:hidden;
       flex:0 0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      color:#111827;
-      font-size:14px;
     }
-
-    .logoBox img{
+    .logoWrap img{
       width:100%;
       height:100%;
       object-fit:contain;
       display:block;
-      background:#ffffff;
+      padding:4px;
+    }
+    .fallbackBox{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      background:var(--card2);
     }
 
-    .miniLogo{
-      width:18px;
-      height:18px;
-      border-radius:6px;
-      background:#e5e7eb;
-      border:1px solid var(--border);
-      overflow:hidden;
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      background:var(--liveBg);
+      color:var(--live);
+      border:1px solid var(--liveBorder);
+      padding:4px 7px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .dot{
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:var(--live);
+      box-shadow:0 0 0 3px rgba(34,197,94,.08);
+      flex:0 0 auto;
+    }
+
+    .autoBadge{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      flex:0 0 auto;
-    }
-
-    .miniLogo img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      display:block;
-      background:#ffffff;
-    }
-
-    .nameBlock{ min-width:0; }
-
-    .name{
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid var(--autoBadgeBorder);
+      background:var(--autoBadgeBg);
+      color:var(--autoBadgeText);
+      font-size:8px;
       font-weight:900;
-      font-size:16px;
+      line-height:1;
+      text-transform:uppercase;
+    }
+
+    .compactCard{ padding:7px; }
+    .compactTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:5px;
+      margin-bottom:6px;
+    }
+    .compactLeague{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:9px;
+      font-weight:800;
+      color:var(--muted);
+    }
+    .compactStatus{
+      flex:0 0 auto;
+      font-size:8px;
+      font-weight:900;
+      color:var(--muted);
+      background:var(--card2);
+      border:1px solid var(--line);
+      padding:3px 5px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .compactTeams{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:5px;
+      align-items:start;
+    }
+    .miniTeam{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      min-width:0;
+    }
+    .miniName{
+      font-size:9px;
+      font-weight:900;
+      line-height:1.05;
+      text-align:center;
+      min-height:2.1em;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
+    }
+    .compactCard .logoWrap{
+      width:34px;
+      height:34px;
+    }
+    .compactScoreBox{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      margin-top:6px;
+      padding:5px 7px;
+      border-radius:11px;
+      background:var(--scoreBg);
+      border:1px solid var(--line);
+    }
+
+    .bigScore{
+      font-weight:950;
+      letter-spacing:.12px;
+      font-variant-numeric:tabular-nums;
+    }
+    .bigScore.compactSize{ font-size:17px; }
+    .bigScore.detailSize{ font-size:22px; }
+
+    .smallMeta{
+      margin-top:5px;
+      font-size:8px;
+      font-weight:850;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.15;
+    }
+    .compactActions{
+      margin-top:6px;
+    }
+
+    .selectedCard{
+      display:flex;
+      flex-direction:column;
+      cursor:pointer;
+    }
+    .selectedTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:5px;
+      margin-bottom:6px;
+    }
+    .selectedTitle{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .selectedTournament{
+      font-weight:900;
+      line-height:1.08;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .selectedMeta{
+      margin-top:1px;
+      color:var(--muted);
+      font-weight:800;
       line-height:1.1;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
     }
-
-    .sub{
+    .selectedFlags{
+      display:flex;
+      gap:4px;
       margin-top:4px;
-      color:var(--muted);
-      font-size:12px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .meta{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      flex:0 0 auto;
-    }
-
-    .pill{
-      font-size:12px;
-      border:1px solid var(--border);
-      background:#fafafa;
-      border-radius:999px;
-      padding:6px 10px;
-      color:#111827;
-      white-space:nowrap;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-    }
-
-    @media (max-width:480px){
-      .logoBox{ width:40px; height:40px; border-radius:10px; }
-      .name{ font-size:15px; }
-      .miniLogo{ width:16px; height:16px; border-radius:5px; }
-    }
-
-    /* =========
-       Match-layout (Hub + gjenbruk)
-       ========= */
-    .matchCard{ cursor:pointer; }
-    .matchCard:active{ transform: translateY(1px); }
-
-    .matchHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom:10px;
       flex-wrap:wrap;
     }
 
-    .compTitle{
-      font-weight:850;
-      font-size:15px;
-      line-height:1.2;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      min-width:0;
-    }
-
-    .scoreRow{
+    .teamsRow{
       display:grid;
       grid-template-columns:1fr auto 1fr;
       align-items:center;
-      gap:10px;
-      margin-top:8px;
+      gap:5px;
     }
-
-    .team{
-      font-weight:650;
-      font-size:14px;
-      display:inline-flex;
+    .teamV{
+      display:flex;
+      flex-direction:column;
       align-items:center;
-      gap:8px;
+      gap:4px;
       min-width:0;
     }
-
-    .team.right{
-      justify-content:flex-end;
-      text-align:right;
-    }
-
-    .teamName{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width:100%;
-      display:inline-block;
-    }
-
-    .bigScore{
-      text-align:center;
-      min-width:110px;
-    }
-
-    .sets{
-      font-size:22px;
+    .teamVName{
       font-weight:900;
       line-height:1.05;
-    }
-
-    .points{
-      margin-top:2px;
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .setline{
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:8px;
-      margin-top:12px;
-    }
-
-    .setbox{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:8px;
-      background:#fcfcfc;
       text-align:center;
+      min-height:2em;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
     }
 
-    .setbox .label{
-      font-size:11px;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
-
-    .setbox .val{
-      font-size:13px;
-      font-weight:700;
-    }
-
-    @media (max-width:480px){
-      .setline{ grid-template-columns:repeat(3,1fr); }
-    }
-
-    /* =========
-       Live-spesifikk styling
-       ========= */
-    .card.focused {
-      border-color:#111827;
-      box-shadow:0 14px 30px rgba(15, 23, 42, 0.35);
-      transform:translateY(-2px);
-      padding:20px 24px;
-    }
-
-    .cardHeader {
+    .scoreCenter{
       display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom:8px;
-    }
-
-    .status {
-      font-size:12px;
-      border:1px solid var(--border);
-      background:#11182708;
-      border-radius:999px;
-      padding:6px 10px;
-      white-space:nowrap;
-      color:var(--text);
-      display:inline-flex;
+      flex-direction:column;
       align-items:center;
-      gap:6px;
+      gap:2px;
+      min-width:0;
     }
-
-    .card.focused .scoreRow{
-      margin-top:16px;
-      gap:40px;
-    }
-
-    .card.focused .teamName{
-      font-size:16px;
-    }
-
-    .bigScore{
-      text-align:center;
-      min-width:120px;
-    }
-
-    .pointsMain{
-      font-size:26px;
-      font-weight:900;
-      line-height:1.1;
-    }
-
-    .card.focused .pointsMain{
-      font-size:40px;
-    }
-
-    .card.focused .points{
-      font-size:14px;
-    }
-
-    .pointVal{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      min-width:28px;
-      padding:0 6px;
-      border-radius:8px;
-    }
-
-    .pointSep{
-      padding:0 4px;
-    }
-
-    @keyframes scoreBlink{
-      0%,100%{ background:transparent; }
-      25%,75%{ background:#fef3c7; }
-      50%{ background:#facc15; }
-    }
-
-    .pointVal.blinkScore{
-      animation:scoreBlink 0.7s ease-in-out 2;
-    }
-
-    /* settlinje i fokus */
-    .card.focused .setline{
-      gap:10px;
-      margin-top:16px;
-    }
-
-    .card.focused .setbox{
-      padding:8px 6px;
-      border-radius:12px;
-    }
-
-    .card.focused .setbox .label{
-      font-size:11px;
-      margin-bottom:4px;
-    }
-
-    .card.focused .setbox .val{
-      font-size:14px;
-    }
-
-    .focusBar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:8px;
-      margin-bottom:4px;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .focusInfo{
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .backBtn{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#111827;
-      color:#ffffff;
-      padding:6px 12px;
-      font-size:12px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .backBtn:hover{
-      background:#020617;
-    }
-
-    .filterBtn{
-      cursor:pointer;
-      outline:none;
-      border:1px solid var(--border);
-      background:#fafafa;
-    }
-
-    .filterBtn:active{
-      transform:translateY(1px);
-    }
-
-    /* Serve/poeng-ikon */
-
-    .pointWrap{
-      position:relative;
-      display:inline-block;
-      min-width:26px;
-      text-align:center;
-    }
-
-    .pointWrap.home .serveIcon{
-      position:absolute;
-      right:100%;
-      top:50%;
-      transform:translateY(-50%);
-      margin-right:6px;
-    }
-
-    .pointWrap.away .serveIcon{
-      position:absolute;
-      left:100%;
-      top:50%;
-      transform:translateY(-50%);
-      margin-left:6px;
-    }
-
-    .serveIcon{
-      font-size:18px;
-      line-height:1;
+    .scoreLine{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      white-space:nowrap;
+      gap:5px;
+      font-variant-numeric:tabular-nums;
     }
-
-    .card.focused .serveIcon{
-      font-size:20px;
-    }
-
-    .serveIconInner{
+    .scorePiece{
       display:inline-flex;
       align-items:center;
       gap:2px;
     }
-
-    .serveIcon.home{ color:#2563eb; }
-    .serveIcon.away{ color:#dc2626; }
-
-    @keyframes hotGlow{
-      0%,100%{ opacity:1; filter:none; }
-      50%{ opacity:0.7; filter:drop-shadow(0 0 4px currentColor); }
-    }
-
-    .serveIcon.hot{
-      animation:hotGlow 1.1s ease-in-out infinite;
-    }
-
-    .pointNumber{
+    .scoreNum{
       display:inline-block;
-      min-width:20px;
+      width:2ch;
+    }
+    .scoreNum.home{text-align:right}
+    .scoreNum.away{text-align:left}
+    .scoreDash{
+      display:inline-block;
+      width:1ch;
       text-align:center;
+      opacity:.35;
+      font-weight:950;
     }
 
-    .serveInfoRow{
-      margin-top:4px;
-      font-size:11px;
+    .metaLine,.serveLine{
+      color:var(--muted);
+      text-align:center;
+      font-weight:800;
+      line-height:1.05;
+    }
+    .serveLine{
       text-transform:uppercase;
-      letter-spacing:0.04em;
-      color:#4b5563;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      align-items:center;
+      letter-spacing:.2px;
+      text-align:left;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
     }
 
-    .playLabel{
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid rgba(59,130,246,.12);
+      background:rgba(59,130,246,.08);
+      color:#3b82f6;
+      font-weight:900;
+      text-transform:uppercase;
+      line-height:1;
+      text-align:center;
+      max-width:100%;
+    }
+    .tag.sideout{
+      background:rgba(59,130,246,.08);
+      border-color:rgba(59,130,246,.12);
+      color:#3b82f6;
+    }
+    .tag.break{
+      background:rgba(220,38,38,.08);
+      border-color:rgba(220,38,38,.12);
+      color:#dc2626;
+    }
+    .tag.breakStrong{
+      background:rgba(220,38,38,.12);
+      border-color:rgba(220,38,38,.16);
+      color:#ef4444;
+    }
+    body.dark .tag.break{ color:#fca5a5; }
+    body.dark .tag.breakStrong{ color:#fecaca; }
+
+    .actionsRow{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:5px;
+      align-items:center;
+      margin-top:6px;
+    }
+
+    .serveActionRow{
+      display:none;
+      grid-template-columns:1fr auto;
+      gap:6px;
+      align-items:center;
+      margin-top:5px;
+    }
+    .selectedCard.expanded .serveActionRow{ display:grid; }
+
+    .dragHandle{
       display:inline-flex;
       align-items:center;
       gap:4px;
-      padding:2px 6px;
+      min-width:0;
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .dragHandle:active{cursor:grabbing}
+    .grip{
+      display:inline-grid;
+      grid-template-columns:repeat(2,3px);
+      gap:2px;
+      opacity:.6;
+      flex:0 0 auto;
+    }
+    .grip span{
+      width:3px;
+      height:3px;
       border-radius:999px;
-      background:#e5e7eb;
-      font-size:10px;
+      background:currentColor;
+      display:block;
     }
 
-    .playLabel.break-point{
-      background:#fee2e2;
-      color:#b91c1c;
+    .setsRow{
+      display:none;
+      grid-template-columns:repeat(auto-fit,minmax(36px,1fr));
+      gap:3px;
+      margin-top:6px;
+      padding-top:6px;
+      border-top:1px solid var(--line);
+    }
+    .selectedCard.expanded .setsRow{ display:grid; }
+
+    .setPill{
+      min-width:0;
+      background:var(--pill);
+      border:1px solid var(--line);
+      border-radius:8px;
+      text-align:center;
+    }
+    .setPill.active{
+      background:var(--pillActive);
+      border-color:rgba(96,165,250,.18);
+    }
+    .setLabel{
+      color:var(--muted);
+      font-weight:850;
+      line-height:1;
+      margin-bottom:2px;
+    }
+    .setScore{
+      font-weight:950;
+      line-height:1.05;
+      font-variant-numeric:tabular-nums;
     }
 
-    .playLabel.side-out{
-      background:#e0f2fe;
-      color:#0369a1;
-    }
-
-    /* Tema-knapp i live.js */
-    .themeToggle{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:var(--card);
-      color:var(--text);
-      padding:6px 12px;
-      font-size:12px;
-      cursor:pointer;
+    .scoreIcons{
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      gap:1px;
+      line-height:1;
+      font-size:10px;
+    }
+    @keyframes blinkPulse{0%,49%{opacity:1}50%,100%{opacity:.25}}
+    .iconBlink{animation:blinkPulse 1s infinite}
+
+    .card.dragging{
+      opacity:.66;
+      transform:scale(.99);
+      box-shadow:0 14px 28px rgba(2,6,23,.12);
+    }
+    .dropPlaceholder{
+      border:2px dashed rgba(96,165,250,.26);
+      border-radius:15px;
+      background:rgba(96,165,250,.06);
+      box-shadow:none;
     }
 
-    .themeToggle:hover{
-      box-shadow:0 2px 6px rgba(15, 23, 42, 0.15);
+    .btn.danger.small{
+      min-height:28px;
+      padding:5px 10px;
+      font-size:9px;
     }
-    /* Ligatittel i Hub (gruppe-overskrift) */
-.leagueHeader {
-  margin: 16px 0 4px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
 
-/* Mindre sett-bokser inne på Hub-kampkort (matchCard) */
-.matchCard .setbox {
-  padding: 4px 4px;
-  border-radius: 8px;
-}
+    .grid.selected.selected-1 .selectedCard{ padding:13px; }
+    .grid.selected.selected-1 .logoWrap{ width:54px; height:54px; }
+    .grid.selected.selected-1 .selectedTournament{ font-size:13px; }
+    .grid.selected.selected-1 .selectedMeta{ font-size:10px; }
+    .grid.selected.selected-1 .teamVName{ font-size:12px; }
+    .grid.selected.selected-1 .bigScore.detailSize{ font-size:28px; }
+    .grid.selected.selected-1 .metaLine,.grid.selected.selected-1 .serveLine{ font-size:10px; }
+    .grid.selected.selected-1 .tag{ font-size:9px; padding:4px 9px; }
+    .grid.selected.selected-1 .dragHandle{ font-size:10px; }
+    .grid.selected.selected-1 .setLabel{ font-size:8px; }
+    .grid.selected.selected-1 .setScore{ font-size:11px; }
+    .grid.selected.selected-1 .setPill{ padding:5px 4px; }
+    .grid.selected.selected-1 .badge{ font-size:10px; }
+    .grid.selected.selected-1 .scoreIcons{ font-size:11px; }
 
-.matchCard .setbox .label {
-  font-size: 10px;
-}
+    .grid.selected.selected-2 .selectedCard{ padding:11px; }
+    .grid.selected.selected-2 .logoWrap{ width:46px; height:46px; }
+    .grid.selected.selected-2 .selectedTournament{ font-size:11px; }
+    .grid.selected.selected-2 .selectedMeta{ font-size:9px; }
+    .grid.selected.selected-2 .teamVName{ font-size:11px; }
+    .grid.selected.selected-2 .bigScore.detailSize{ font-size:24px; }
+    .grid.selected.selected-2 .metaLine,.grid.selected.selected-2 .serveLine{ font-size:9px; }
+    .grid.selected.selected-2 .tag{ font-size:8px; padding:4px 7px; }
+    .grid.selected.selected-2 .dragHandle{ font-size:9px; }
+    .grid.selected.selected-2 .setLabel{ font-size:8px; }
+    .grid.selected.selected-2 .setScore{ font-size:10px; }
+    .grid.selected.selected-2 .setPill{ padding:4px 3px; }
 
-.matchCard .setbox .val {
-  font-size: 12px;
-}
+    .grid.selected.selected-4 .selectedCard{ padding:8px; }
+    .grid.selected.selected-4 .logoWrap{ width:36px; height:36px; }
+    .grid.selected.selected-4 .selectedTournament{ font-size:9px; }
+    .grid.selected.selected-4 .selectedMeta{ font-size:8px; }
+    .grid.selected.selected-4 .teamVName{ font-size:9px; }
+    .grid.selected.selected-4 .bigScore.detailSize{ font-size:18px; }
+    .grid.selected.selected-4 .metaLine,.grid.selected.selected-4 .serveLine{ font-size:8px; }
+    .grid.selected.selected-4 .tag{ font-size:7px; padding:2px 6px; }
+    .grid.selected.selected-4 .dragHandle{ font-size:8px; }
+    .grid.selected.selected-4 .setLabel{ font-size:7px; }
+    .grid.selected.selected-4 .setScore{ font-size:9px; }
+    .grid.selected.selected-4 .setPill{ padding:3px; }
 
+    .grid.selected.selected-6{ gap:6px; }
+    .grid.selected.selected-6 .selectedCard{ padding:7px; }
+    .grid.selected.selected-6 .selectedTop{ margin-bottom:5px; gap:5px; }
+    .grid.selected.selected-6 .teamsRow{ gap:4px; }
+    .grid.selected.selected-6 .teamV{ gap:3px; }
+    .grid.selected.selected-6 .logoWrap{ width:30px; height:30px; border-radius:10px; }
+    .grid.selected.selected-6 .selectedTournament{ font-size:9px; }
+    .grid.selected.selected-6 .selectedMeta{ font-size:7px; }
+    .grid.selected.selected-6 .teamVName{ font-size:9px; min-height:2em; }
+    .grid.selected.selected-6 .bigScore.detailSize{ font-size:16px; }
+    .grid.selected.selected-6 .metaLine,.grid.selected.selected-6 .serveLine{ font-size:7px; }
+    .grid.selected.selected-6 .tag{ font-size:7px; padding:2px 5px; }
+    .grid.selected.selected-6 .actionsRow{ gap:5px; margin-top:5px; }
+    .grid.selected.selected-6 .serveActionRow{ gap:5px; margin-top:4px; }
+    .grid.selected.selected-6 .dragHandle{ font-size:8px; gap:4px; }
+    .grid.selected.selected-6 .setLabel{ font-size:6px; }
+    .grid.selected.selected-6 .setScore{ font-size:8px; }
+    .grid.selected.selected-6 .setPill{ padding:3px 2px; }
+
+    .grid.selected.selected-8plus{ gap:5px; }
+    .grid.selected.selected-8plus .selectedCard{ padding:6px; }
+    .grid.selected.selected-8plus .selectedTop{ margin-bottom:4px; gap:4px; }
+    .grid.selected.selected-8plus .teamsRow{ gap:4px; }
+    .grid.selected.selected-8plus .teamV{ gap:3px; }
+    .grid.selected.selected-8plus .logoWrap{ width:28px; height:28px; border-radius:9px; }
+    .grid.selected.selected-8plus .selectedTournament{ font-size:8px; }
+    .grid.selected.selected-8plus .selectedMeta{ font-size:7px; }
+    .grid.selected.selected-8plus .teamVName{ font-size:8px; min-height:2em; }
+    .grid.selected.selected-8plus .bigScore.detailSize{ font-size:15px; }
+    .grid.selected.selected-8plus .metaLine,.grid.selected.selected-8plus .serveLine{ font-size:7px; }
+    .grid.selected.selected-8plus .tag{ font-size:6px; padding:2px 5px; }
+    .grid.selected.selected-8plus .actionsRow{ gap:4px; margin-top:4px; }
+    .grid.selected.selected-8plus .serveActionRow{ gap:4px; margin-top:4px; }
+    .grid.selected.selected-8plus .dragHandle{ font-size:7px; gap:4px; }
+    .grid.selected.selected-8plus .setLabel{ font-size:6px; }
+    .grid.selected.selected-8plus .setScore{ font-size:7px; }
+    .grid.selected.selected-8plus .setPill{ padding:2px; }
+
+    @media (min-width:560px){
+      .grid.all{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .grid.selected.selected-2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .grid.selected.selected-4,
+      .grid.selected.selected-6,
+      .grid.selected.selected-8plus{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
   </style>
 </head>
-
-<body data-theme="light">
-  <div class="wrap">
-    <div class="header">
-      <div>
-        <h1>🏐 Volleyball</h1>
-        <div class="tabs">
-          <button class="tabBtn active" data-tab="live">Livescore</button>
-          <button class="tabBtn" data-tab="hub">Volley Hub</button>
-        </div>
+<body>
+  <header>
+    <div class="headRow">
+      <div class="headLeft">
+        <h1>Live volleyball</h1>
+        <p class="sub">Valgte = manuelle + mizuno + abroad. Trykk kort for serve og sett.</p>
       </div>
-      <button id="themeBtn" class="tabBtn">🌙 Mørk</button>
+      <div class="headRight">
+<div class="headButtons">
+  <a class="navIcon" href="live-index.html" title="Live" aria-label="Live">🏐</a>
+  <a class="navIcon" href="dagens_kamper.html" title="Dagens kamper" aria-label="Dagens kamper">📅</a>
+  <a class="navIcon" href="lag.html" title="Lag" aria-label="Lag">⭐</a>
+  <button id="themeToggle" class="themeToggle" type="button" aria-label="Bytt tema" title="Bytt dag/natt">🌙</button>
+</div>
+        <div class="lastUpdated" id="lastUpdated"></div>
+      </div>
     </div>
 
-    <div id="live-root" class="view active"></div>
-    <div id="hub-root" class="view"></div>
-  </div>
+    <div class="tabs">
+      <button id="tabAll" class="tab" type="button">Alle (0)</button>
+      <button id="tabSelected" class="tab active" type="button">Valgte (0)</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="grid" class="grid selected selected-1"></div>
+    <div id="empty" class="empty" style="display:none"></div>
+  </main>
 
   <script>
-    (function(){
-      let theme = "light";
-      const body = document.body;
-      const btn  = document.getElementById("themeBtn");
+    const API_URL = "https://volleyball.ronesse.no/live";
+    const TEAMS_API_URL = "https://volleyball.ronesse.no/teams?limit=200&offset=0";
+    const LOGO_URL = (teamId) => `https://volleyball.ronesse.no/img/teams/${teamId}.png`;
 
-      btn.onclick = () => {
-        theme = theme === "light" ? "dark" : "light";
-        body.setAttribute("data-theme", theme);
-        btn.textContent = theme === "light" ? "🌙 Mørk" : "🌞 Lys";
+    const STORAGE_KEY_ORDER = "followed_matches_v2";
+    const STORAGE_KEY_MOMENTUM = "match_momentum_v1";
+    const STORAGE_KEY_EXPANDED = "expanded_matches_v1";
+    const STORAGE_KEY_THEME = "volley_theme_v1";
+    const STORAGE_KEY_ALERTED = "alerted_live_matches_v1";
+    const STORAGE_KEY_HIDDEN_AUTO = "hidden_auto_matches_v1";
+
+    let liveMatches = [];
+    let favoriteTeamIds = new Set();
+    let autoFavoriteTeamMeta = new Map();
+
+    let currentTab = "selected";
+    let wakeLock = null;
+    let refreshInFlight = false;
+
+    let followedOrder = loadFollowedOrder();
+    let followedSet = new Set(followedOrder);
+    const lastMomentumByEvent = loadMomentumCache();
+    let expandedMatches = loadExpandedMatches();
+    let alertedLiveMatches = loadAlertedLiveMatches();
+    let hiddenAutoMatches = loadHiddenAutoMatches();
+
+    function loadFollowedOrder(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ORDER);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr.map(String);
+      } catch { return []; }
+    }
+
+    function saveFollowedOrder(){
+      localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(followedOrder));
+      followedSet = new Set(followedOrder);
+    }
+
+    function addFollowed(id){
+      id = String(id);
+      if (followedSet.has(id)) return;
+      followedOrder.push(id);
+      saveFollowedOrder();
+    }
+
+    function removeFollowed(id){
+      id = String(id);
+      if (!followedSet.has(id)) return;
+      followedOrder = followedOrder.filter(x => x !== id);
+      saveFollowedOrder();
+      lastMomentumByEvent.delete(id);
+      expandedMatches.delete(id);
+      saveMomentumCache();
+      saveExpandedMatches();
+    }
+
+    function moveFollowed(fromId, toId){
+      fromId = String(fromId);
+      toId = String(toId);
+      if (fromId === toId) return;
+
+      const fromIdx = followedOrder.indexOf(fromId);
+      const toIdx = followedOrder.indexOf(toId);
+      if (fromIdx < 0 || toIdx < 0) return;
+
+      const [item] = followedOrder.splice(fromIdx, 1);
+      const newToIdx = followedOrder.indexOf(toId);
+      followedOrder.splice(newToIdx, 0, item);
+      saveFollowedOrder();
+    }
+
+    function moveFollowedToEndOfLive(fromId, liveSelectedIds){
+      fromId = String(fromId);
+      if (!liveSelectedIds.length) return;
+
+      const fromIdx = followedOrder.indexOf(fromId);
+      if (fromIdx < 0) return;
+
+      const [item] = followedOrder.splice(fromIdx, 1);
+      const lastLiveId = liveSelectedIds[liveSelectedIds.length - 1];
+      const lastIdx = followedOrder.indexOf(lastLiveId);
+
+      if (lastIdx < 0) followedOrder.push(item);
+      else followedOrder.splice(lastIdx + 1, 0, item);
+      saveFollowedOrder();
+    }
+
+    function loadMomentumCache(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY_MOMENTUM);
+        if (!raw) return new Map();
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== "object") return new Map();
+
+        const m = new Map();
+        for (const [k, v] of Object.entries(obj)){
+          if (v && typeof v === "object" && (v.side === "home" || v.side === "away")){
+            m.set(String(k), v);
+          }
+        }
+        return m;
+      } catch { return new Map(); }
+    }
+
+    function saveMomentumCache(){
+      const MAX = 250;
+      const entries = Array.from(lastMomentumByEvent.entries()).slice(-MAX);
+      const obj = {};
+      for (const [k, v] of entries) obj[String(k)] = v;
+      try { localStorage.setItem(STORAGE_KEY_MOMENTUM, JSON.stringify(obj)); } catch {}
+    }
+
+    function loadExpandedMatches(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY_EXPANDED);
+        if (!raw) return new Set();
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return new Set();
+        return new Set(arr.map(String));
+      } catch { return new Set(); }
+    }
+
+    function saveExpandedMatches(){
+      try{
+        localStorage.setItem(STORAGE_KEY_EXPANDED, JSON.stringify(Array.from(expandedMatches)));
+      } catch {}
+    }
+
+    function toggleExpandedMatch(id){
+      id = String(id);
+      if (expandedMatches.has(id)) expandedMatches.delete(id);
+      else expandedMatches.add(id);
+      saveExpandedMatches();
+    }
+
+    function loadAlertedLiveMatches(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY_ALERTED);
+        if (!raw) return new Set();
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return new Set();
+        return new Set(arr.map(String));
+      } catch { return new Set(); }
+    }
+
+    function saveAlertedLiveMatches(){
+      try{
+        localStorage.setItem(STORAGE_KEY_ALERTED, JSON.stringify(Array.from(alertedLiveMatches).slice(-300)));
+      } catch {}
+    }
+
+    function loadHiddenAutoMatches(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY_HIDDEN_AUTO);
+        if (!raw) return new Set();
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return new Set();
+        return new Set(arr.map(String));
+      } catch { return new Set(); }
+    }
+
+    function saveHiddenAutoMatches(){
+      try{
+        localStorage.setItem(STORAGE_KEY_HIDDEN_AUTO, JSON.stringify(Array.from(hiddenAutoMatches)));
+      } catch {}
+    }
+
+    function loadTheme(){
+      try{ return localStorage.getItem(STORAGE_KEY_THEME) || ""; }
+      catch { return ""; }
+    }
+
+    function saveTheme(theme){
+      try{ localStorage.setItem(STORAGE_KEY_THEME, theme); } catch {}
+    }
+
+    function applyTheme(theme){
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      const btn = document.getElementById("themeToggle");
+      btn.textContent = dark ? "☀️" : "🌙";
+      btn.setAttribute("title", dark ? "Bytt til dagmodus" : "Bytt til nattmodus");
+      btn.setAttribute("aria-label", dark ? "Bytt til dagmodus" : "Bytt til nattmodus");
+    }
+
+    function initTheme(){
+      const saved = loadTheme();
+      if (saved === "dark" || saved === "light"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme(){
+      const next = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      saveTheme(next);
+    }
+
+    async function fetchLive(){
+      const res = await fetch(API_URL, { headers: { accept: "application/json" }, cache:"no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    }
+
+    async function fetchTeams(){
+      const res = await fetch(TEAMS_API_URL, { headers: { accept: "application/json" }, cache:"no-store" });
+      if (!res.ok) throw new Error(`Teams HTTP ${res.status}`);
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    }
+
+    function buildFavoriteTeams(teams){
+      const ids = new Set();
+      const meta = new Map();
+
+      for (const team of teams){
+        const group = String(team.group_type || "").toLowerCase();
+        const sofaId = String(team.sofascore_team_id ?? "").trim();
+        if (!sofaId) continue;
+        if (group !== "mizuno" && group !== "abroad") continue;
+
+        ids.add(sofaId);
+        if (!meta.has(sofaId)) meta.set(sofaId, []);
+        meta.get(sofaId).push({
+          groupType: group,
+          teamName: team.name || "",
+          country: team.country || ""
+        });
+      }
+
+      favoriteTeamIds = ids;
+      autoFavoriteTeamMeta = meta;
+    }
+
+    function getAutoMatchReasons(match){
+      const homeId = String(match.home_team_id ?? "");
+      const awayId = String(match.away_team_id ?? "");
+      const out = [];
+
+      if (autoFavoriteTeamMeta.has(homeId)) out.push(...autoFavoriteTeamMeta.get(homeId));
+      if (autoFavoriteTeamMeta.has(awayId)) out.push(...autoFavoriteTeamMeta.get(awayId));
+
+      const seen = new Set();
+      return out.filter(x => {
+        const key = `${x.groupType}:${x.teamName}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function isFavoriteMatch(match){
+      const homeId = String(match.home_team_id ?? "");
+      const awayId = String(match.away_team_id ?? "");
+      return favoriteTeamIds.has(homeId) || favoriteTeamIds.has(awayId);
+    }
+
+    function maybeVibrateForNewFavoriteLiveMatches(inprogressMatches){
+      let didVibrate = false;
+      for (const match of inprogressMatches){
+        const eventId = String(match.event_id);
+        if (!isFavoriteMatch(match)) continue;
+        if (alertedLiveMatches.has(eventId)) continue;
+        alertedLiveMatches.add(eventId);
+        didVibrate = true;
+      }
+      if (didVibrate && navigator.vibrate) navigator.vibrate([120, 60, 180]);
+      if (didVibrate) saveAlertedLiveMatches();
+    }
+
+    function ordinalToSetNumber(statusDesc){
+      if (!statusDesc) return null;
+      const s = String(statusDesc).toLowerCase();
+      const m = s.match(/(\d)(st|nd|rd|th)\s+set/);
+      if (m) return parseInt(m[1], 10);
+      return null;
+    }
+
+    function lastNonNullSetIndex(match){
+      const hs = [match.home_p1, match.home_p2, match.home_p3, match.home_p4, match.home_p5];
+      const as = [match.away_p1, match.away_p2, match.away_p3, match.away_p4, match.away_p5];
+      let last = 0;
+      for (let i = 0; i < 5; i++){
+        if (hs[i] != null || as[i] != null) last = i + 1;
+      }
+      return last || 1;
+    }
+
+    function getCurrentSetNumber(match){
+      return ordinalToSetNumber(match.status_desc) || lastNonNullSetIndex(match);
+    }
+
+    function getPointsForSet(match, setNo){
+      return {
+        h: match[`home_p${setNo}`],
+        a: match[`away_p${setNo}`]
+      };
+    }
+
+    function iconToGlyph(icon){
+      if (icon === "ball") return "🏐";
+      if (icon === "flame") return "🔥";
+      if (icon === "party") return "🎉";
+      return "";
+    }
+
+    function computeMomentumFromMatch(match){
+      const homeRun = Number(match.home_point_run || 0);
+      const awayRun = Number(match.away_point_run || 0);
+
+      let side = null;
+      let run = 0;
+
+      if (homeRun !== 0 && awayRun === 0){
+        side = "home"; run = homeRun;
+      } else if (awayRun !== 0 && homeRun === 0){
+        side = "away"; run = awayRun;
+      } else if (homeRun !== 0 || awayRun !== 0){
+        if (homeRun >= awayRun){ side = "home"; run = homeRun; }
+        else { side = "away"; run = awayRun; }
+      } else return null;
+
+      const cfg = {
+        side, run, icons: [], blink: false,
+        tagText: "SIDE-OUT", tagClass: "sideout", ts: Date.now()
       };
 
-      document.querySelectorAll(".tabBtn[data-tab]").forEach(b => {
-        b.onclick = () => {
-          document.querySelectorAll(".tabBtn[data-tab]").forEach(x => x.classList.remove("active"));
-          b.classList.add("active");
-          document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-          document.getElementById(b.dataset.tab + "-root").classList.add("active");
-        };
-      });
-    })();
-  </script>
+      if (run === 1){
+        cfg.icons = ["ball"];
+      } else if (run === 2){
+        cfg.icons = ["ball","flame"];
+        cfg.tagText = "BREAK-POINT";
+        cfg.tagClass = "break";
+      } else if (run === 3){
+        cfg.icons = ["ball","flame"];
+        cfg.blink = true;
+        cfg.tagText = "DBL BREAK";
+        cfg.tagClass = "breakStrong";
+      } else if (run >= 4){
+        cfg.icons = ["ball","flame","party"];
+        cfg.tagText = "3RD BREAK";
+        cfg.tagClass = "breakStrong";
+      }
+      return cfg;
+    }
 
-  <!-- Appene -->
-  <script type="text/babel" src="live.js"></script>
-  <script type="text/babel" src="hub.js"></script>
+    function getMomentum(match){
+      const id = String(match.event_id);
+      if (match.new_score === 1){
+        const m = computeMomentumFromMatch(match);
+        if (m){
+          lastMomentumByEvent.set(id, m);
+          saveMomentumCache();
+        }
+        return m || lastMomentumByEvent.get(id) || null;
+      }
+      return lastMomentumByEvent.get(id) || null;
+    }
+
+    function makeLogo(teamId, fallbackLetter){
+      const wrap = document.createElement("div");
+      wrap.className = "logoWrap";
+
+      const img = document.createElement("img");
+      img.alt = "Team logo";
+      img.loading = "lazy";
+      img.src = LOGO_URL(teamId);
+
+      img.onerror = () => {
+        wrap.innerHTML = "";
+        const fb = document.createElement("div");
+        fb.className = "fallbackBox";
+        fb.textContent = fallbackLetter;
+        wrap.appendChild(fb);
+      };
+
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function formatUtc(utcString){
+      if (!utcString) return "";
+      const d = new Date(String(utcString).replace(" ", "T"));
+      if (Number.isNaN(d.getTime())) return String(utcString);
+      return d.toLocaleString("no-NO", {
+        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function setLastUpdated(text){
+      document.getElementById("lastUpdated").textContent = text;
+    }
+
+    function getOrderedLiveSelectedMatches(inprogress){
+      const matchById = new Map(inprogress.map(m => [String(m.event_id), m]));
+
+      const manualSelected = followedOrder
+        .map(id => matchById.get(String(id)))
+        .filter(Boolean);
+
+      const manualIds = new Set(manualSelected.map(m => String(m.event_id)));
+
+      const autoSelected = inprogress
+        .filter(m => {
+          const eventId = String(m.event_id);
+          return isFavoriteMatch(m) && !manualIds.has(eventId) && !hiddenAutoMatches.has(eventId);
+        })
+        .sort((a, b) => (b.change_ts ?? 0) - (a.change_ts ?? 0));
+
+      return [...manualSelected, ...autoSelected];
+    }
+
+    function updateTabLabels(){
+      const inprogress = liveMatches.filter(m => m.status_type === "inprogress");
+      document.getElementById("tabAll").textContent = `Alle (${inprogress.length})`;
+      document.getElementById("tabSelected").textContent = `Valgte (${getOrderedLiveSelectedMatches(inprogress).length})`;
+    }
+
+    function updateSelectedDensity(count){
+      const grid = document.getElementById("grid");
+      grid.classList.remove("selected-1", "selected-2", "selected-4", "selected-6", "selected-8plus");
+      if (count <= 1) grid.classList.add("selected-1");
+      else if (count === 2) grid.classList.add("selected-2");
+      else if (count <= 4) grid.classList.add("selected-4");
+      else if (count <= 6) grid.classList.add("selected-6");
+      else grid.classList.add("selected-8plus");
+    }
+
+    function setActiveTab(tab){
+      currentTab = tab;
+      document.getElementById("tabAll").classList.toggle("active", tab === "all");
+      document.getElementById("tabSelected").classList.toggle("active", tab === "selected");
+
+      const grid = document.getElementById("grid");
+      grid.className = tab === "all" ? "grid all" : "grid selected selected-1";
+
+      render();
+      ensureWakeLock();
+    }
+
+    async function requestWakeLock(){
+      try{
+        if (!("wakeLock" in navigator) || wakeLock) return;
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => { wakeLock = null; });
+      } catch {}
+    }
+
+    async function releaseWakeLock(){
+      try{
+        if (wakeLock){
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      } catch { wakeLock = null; }
+    }
+
+    function hasLiveFollowedMatches(){
+      return getOrderedLiveSelectedMatches(
+        liveMatches.filter(m => m.status_type === "inprogress")
+      ).length > 0;
+    }
+
+    function ensureWakeLock(){
+      const shouldKeepAwake = currentTab === "selected" && hasLiveFollowedMatches() && document.visibilityState === "visible";
+      if (shouldKeepAwake) requestWakeLock();
+      else releaseWakeLock();
+    }
+
+    document.addEventListener("visibilitychange", ensureWakeLock);
+
+    function renderSetPills(match, currentSet){
+      const row = document.createElement("div");
+      row.className = "setsRow";
+
+      for (let i = 1; i <= 5; i++){
+        const { h, a } = getPointsForSet(match, i);
+        if (h == null && a == null) continue;
+
+        const pill = document.createElement("div");
+        pill.className = "setPill" + (i === currentSet ? " active" : "");
+
+        const label = document.createElement("div");
+        label.className = "setLabel";
+        label.textContent = `${i}.`;
+
+        const score = document.createElement("div");
+        score.className = "setScore";
+        score.textContent = `${h ?? 0}-${a ?? 0}`;
+
+        pill.appendChild(label);
+        pill.appendChild(score);
+        row.appendChild(pill);
+      }
+      return row;
+    }
+
+    function renderCompactCard(match){
+      const currentSet = getCurrentSetNumber(match);
+      const points = getPointsForSet(match, currentSet);
+
+      const card = document.createElement("div");
+      card.className = "card compactCard";
+
+      const top = document.createElement("div");
+      top.className = "compactTop";
+
+      const league = document.createElement("div");
+      league.className = "compactLeague";
+      league.title = `${match.tournament_name} · ${match.season_name}`;
+      league.textContent = `${match.tournament_name} · ${match.season_name}`;
+
+      const status = document.createElement("div");
+      status.className = "compactStatus";
+      status.textContent = match.status_desc ?? "LIVE";
+
+      top.appendChild(league);
+      top.appendChild(status);
+
+      const teams = document.createElement("div");
+      teams.className = "compactTeams";
+
+      const home = document.createElement("div");
+      home.className = "miniTeam";
+      home.appendChild(makeLogo(match.home_team_id, "H"));
+      const homeName = document.createElement("div");
+      homeName.className = "miniName";
+      homeName.textContent = match.home_team_name;
+      home.appendChild(homeName);
+
+      const away = document.createElement("div");
+      away.className = "miniTeam";
+      away.appendChild(makeLogo(match.away_team_id, "B"));
+      const awayName = document.createElement("div");
+      awayName.className = "miniName";
+      awayName.textContent = match.away_team_name;
+      away.appendChild(awayName);
+
+      teams.appendChild(home);
+      teams.appendChild(away);
+
+      const scoreBox = document.createElement("div");
+      scoreBox.className = "compactScoreBox";
+      scoreBox.innerHTML = `
+        <div class="bigScore compactSize">${points.h ?? 0}</div>
+        <div style="opacity:.35;font-weight:950">-</div>
+        <div class="bigScore compactSize">${points.a ?? 0}</div>
+      `;
+
+      const meta = document.createElement("div");
+      meta.className = "smallMeta";
+      meta.textContent = `${match.home_sets ?? 0}-${match.away_sets ?? 0} · ${currentSet}. sett`;
+
+      const actions = document.createElement("div");
+      actions.className = "compactActions";
+
+      const id = String(match.event_id);
+      const btn = document.createElement("button");
+      btn.className = "btn primary full";
+      btn.textContent = followedSet.has(id) ? "Følger" : "Følg";
+      btn.disabled = followedSet.has(id);
+      btn.onclick = () => {
+        addFollowed(id);
+        updateTabLabels();
+        render();
+        ensureWakeLock();
+      };
+
+      actions.appendChild(btn);
+
+      card.appendChild(top);
+      card.appendChild(teams);
+      card.appendChild(scoreBox);
+      card.appendChild(meta);
+      card.appendChild(actions);
+
+      return card;
+    }
+
+    let draggingId = null;
+    let dragActive = false;
+    let pressTimer = null;
+    let placeholderEl = null;
+    let placeholderHeight = 0;
+    let dropBeforeId = null;
+
+    function clearPlaceholder(){
+      if (placeholderEl && placeholderEl.parentElement) placeholderEl.parentElement.removeChild(placeholderEl);
+      placeholderEl = null;
+    }
+
+    function ensurePlaceholder(){
+      if (placeholderEl) return;
+      placeholderEl = document.createElement("div");
+      placeholderEl.className = "dropPlaceholder";
+      placeholderEl.style.height = `${placeholderHeight}px`;
+      document.getElementById("grid").appendChild(placeholderEl);
+    }
+
+    function placePlaceholderBefore(card){
+      ensurePlaceholder();
+      document.getElementById("grid").insertBefore(placeholderEl, card);
+    }
+
+    function placePlaceholderAtEnd(){
+      ensurePlaceholder();
+      document.getElementById("grid").appendChild(placeholderEl);
+    }
+
+    function cleanupDragUI(sourceCard){
+      if (sourceCard) sourceCard.classList.remove("dragging");
+      dragActive = false;
+      draggingId = null;
+      dropBeforeId = null;
+      clearPlaceholder();
+    }
+
+    function getLiveSelectedIdsInOrder(){
+      return getOrderedLiveSelectedMatches(
+        liveMatches.filter(m => m.status_type === "inprogress")
+      ).map(m => String(m.event_id));
+    }
+
+    function attachDragHandlers(cardEl, eventId){
+      const handle = cardEl.querySelector(".dragHandle");
+      if (!handle) return;
+
+      let startX = 0;
+      let startY = 0;
+
+      handle.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = cardEl.getBoundingClientRect();
+        placeholderHeight = Math.max(62, Math.round(rect.height));
+
+        pressTimer = setTimeout(() => {
+          dragActive = true;
+          draggingId = eventId;
+          dropBeforeId = null;
+
+          if (navigator.vibrate) navigator.vibrate(15);
+
+          cardEl.classList.add("dragging");
+          handle.setPointerCapture?.(e.pointerId);
+
+          ensurePlaceholder();
+          if (cardEl.nextSibling) cardEl.parentElement.insertBefore(placeholderEl, cardEl.nextSibling);
+          else cardEl.parentElement.appendChild(placeholderEl);
+        }, 150);
+      });
+
+      handle.addEventListener("pointermove", (e) => {
+        if (!dragActive){
+          if (pressTimer){
+            const dx = Math.abs(e.clientX - startX);
+            const dy = Math.abs(e.clientY - startY);
+            if (dx + dy > 8){
+              clearTimeout(pressTimer);
+              pressTimer = null;
+            }
+          }
+          return;
+        }
+
+        const margin = 70;
+        const speed = 12;
+        if (e.clientY < margin) window.scrollBy(0, -speed);
+        else if (e.clientY > window.innerHeight - margin) window.scrollBy(0, speed);
+
+        const over = document.elementFromPoint(e.clientX, e.clientY);
+        const overCard = over?.closest?.(".card[data-eid]");
+
+        if (overCard && overCard.dataset.eid && overCard.dataset.eid !== draggingId){
+          placePlaceholderBefore(overCard);
+          dropBeforeId = overCard.dataset.eid;
+        } else {
+          placePlaceholderAtEnd();
+          dropBeforeId = null;
+        }
+      });
+
+      handle.addEventListener("pointerup", () => {
+        if (pressTimer){
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        if (!dragActive) return;
+
+        const fromId = draggingId;
+        const liveIds = getLiveSelectedIdsInOrder().filter(id => id !== fromId);
+
+        if (dropBeforeId && dropBeforeId !== fromId) moveFollowed(fromId, dropBeforeId);
+        else moveFollowedToEndOfLive(fromId, liveIds.concat([fromId]));
+
+        render();
+        cleanupDragUI(cardEl);
+      });
+
+      handle.addEventListener("pointercancel", () => {
+        if (pressTimer){
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        cleanupDragUI(cardEl);
+      });
+    }
+
+    function renderSelectedCard(match){
+      const currentSet = getCurrentSetNumber(match);
+      const points = getPointsForSet(match, currentSet);
+      const momentum = getMomentum(match);
+      const eventId = String(match.event_id);
+      const isExpanded = expandedMatches.has(eventId);
+      const isManual = followedSet.has(eventId);
+      const autoReasons = !isManual ? getAutoMatchReasons(match) : [];
+
+      const card = document.createElement("div");
+      card.className = "card selectedCard" + (isExpanded ? " expanded" : "");
+      card.dataset.eid = eventId;
+
+      card.addEventListener("click", () => {
+        toggleExpandedMatch(eventId);
+        render();
+      });
+
+      const top = document.createElement("div");
+      top.className = "selectedTop";
+
+      const title = document.createElement("div");
+      title.className = "selectedTitle";
+
+      const t = document.createElement("div");
+      t.className = "selectedTournament";
+      t.textContent = match.tournament_name || "";
+
+      const m = document.createElement("div");
+      m.className = "selectedMeta";
+      m.textContent = `${match.season_name || ""} · R${match.round ?? "-"} · ${formatUtc(match.start_utc)}`;
+
+      title.appendChild(t);
+      title.appendChild(m);
+
+      const flags = document.createElement("div");
+      flags.className = "selectedFlags";
+      for (const reason of autoReasons){
+        const badge = document.createElement("div");
+        badge.className = "autoBadge";
+        badge.textContent = reason.groupType === "mizuno" ? "Mizuno" : "Abroad";
+        flags.appendChild(badge);
+      }
+      if (flags.childNodes.length) title.appendChild(flags);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.innerHTML = `<span class="dot"></span><span>${match.status_desc ?? "LIVE"}</span>`;
+
+      top.appendChild(title);
+      top.appendChild(badge);
+
+      const teamsRow = document.createElement("div");
+      teamsRow.className = "teamsRow";
+
+      const home = document.createElement("div");
+      home.className = "teamV";
+      home.appendChild(makeLogo(match.home_team_id, "H"));
+      const homeName = document.createElement("div");
+      homeName.className = "teamVName";
+      homeName.textContent = match.home_team_name;
+      home.appendChild(homeName);
+
+      const away = document.createElement("div");
+      away.className = "teamV";
+      away.appendChild(makeLogo(match.away_team_id, "B"));
+      const awayName = document.createElement("div");
+      awayName.className = "teamVName";
+      awayName.textContent = match.away_team_name;
+      away.appendChild(awayName);
+
+      const center = document.createElement("div");
+      center.className = "scoreCenter";
+
+      const big = document.createElement("div");
+      big.className = "bigScore detailSize scoreLine";
+
+      const homePiece = document.createElement("span");
+      homePiece.className = "scorePiece";
+      const awayPiece = document.createElement("span");
+      awayPiece.className = "scorePiece";
+      const homeIcons = document.createElement("span");
+      homeIcons.className = "scoreIcons";
+      const awayIcons = document.createElement("span");
+      awayIcons.className = "scoreIcons";
+
+      if (momentum){
+        const iconsEl = momentum.side === "home" ? homeIcons : awayIcons;
+        for (const ic of momentum.icons){
+          const sp = document.createElement("span");
+          sp.className = momentum.blink ? "iconBlink" : "";
+          sp.textContent = iconToGlyph(ic);
+          iconsEl.appendChild(sp);
+        }
+      }
+
+      const homeNum = document.createElement("span");
+      homeNum.className = "scoreNum home";
+      homeNum.textContent = `${points.h ?? 0}`;
+
+      const awayNum = document.createElement("span");
+      awayNum.className = "scoreNum away";
+      awayNum.textContent = `${points.a ?? 0}`;
+
+      const dash = document.createElement("span");
+      dash.className = "scoreDash";
+      dash.textContent = "-";
+
+      homePiece.appendChild(homeIcons);
+      homePiece.appendChild(homeNum);
+      awayPiece.appendChild(awayNum);
+      awayPiece.appendChild(awayIcons);
+
+      big.appendChild(homePiece);
+      big.appendChild(dash);
+      big.appendChild(awayPiece);
+
+      const meta = document.createElement("div");
+      meta.className = "metaLine";
+      meta.textContent = `${match.home_sets ?? 0}-${match.away_sets ?? 0} · ${currentSet}. sett`;
+
+      let serveTeam = "UKJENT";
+      if (momentum){
+        serveTeam = momentum.side === "home" ? match.home_team_name : match.away_team_name;
+      }
+
+      const serve = document.createElement("div");
+      serve.className = "serveLine";
+      serve.textContent = `Serve · ${serveTeam}`;
+
+      const tag = document.createElement("div");
+      tag.className = "tag";
+      const isPause = (match.status_desc || "").toLowerCase() === "pause";
+      if (isPause){
+        tag.classList.add("sideout");
+        tag.textContent = "PAUSE";
+      } else if (momentum){
+        tag.classList.add(momentum.tagClass);
+        tag.textContent = momentum.tagText;
+      } else {
+        tag.classList.add("sideout");
+        tag.textContent = "SIDE-OUT";
+      }
+
+      center.appendChild(big);
+      center.appendChild(meta);
+      center.appendChild(tag);
+
+      teamsRow.appendChild(home);
+      teamsRow.appendChild(center);
+      teamsRow.appendChild(away);
+
+      const actions = document.createElement("div");
+      actions.className = "actionsRow";
+
+      const handle = document.createElement("span");
+      handle.className = "dragHandle";
+      handle.addEventListener("click", (e) => e.stopPropagation());
+      handle.innerHTML = `<span class="grip"><span></span><span></span><span></span><span></span><span></span><span></span></span><span>Dra</span>`;
+
+      const smallBtn = document.createElement("button");
+      smallBtn.className = "btn danger small";
+      smallBtn.textContent = isManual ? "Slutt" : "Skjul";
+      smallBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isManual){
+          removeFollowed(eventId);
+        } else {
+          hiddenAutoMatches.add(eventId);
+          expandedMatches.delete(eventId);
+          saveHiddenAutoMatches();
+          saveExpandedMatches();
+        }
+        updateTabLabels();
+        render();
+        ensureWakeLock();
+      });
+
+      actions.appendChild(handle);
+      actions.appendChild(smallBtn);
+
+      const serveActionRow = document.createElement("div");
+      serveActionRow.className = "serveActionRow";
+      serveActionRow.appendChild(serve);
+      const spacer = document.createElement("div");
+      spacer.style.width = "1px";
+      serveActionRow.appendChild(spacer);
+
+      card.appendChild(top);
+      card.appendChild(teamsRow);
+      card.appendChild(actions);
+      card.appendChild(serveActionRow);
+      card.appendChild(renderSetPills(match, currentSet));
+
+      attachDragHandlers(card, eventId);
+      return card;
+    }
+
+    function render(){
+      const grid = document.getElementById("grid");
+      const empty = document.getElementById("empty");
+      grid.innerHTML = "";
+
+      const inprogress = liveMatches.filter(m => m.status_type === "inprogress");
+
+      if (currentTab === "all"){
+        grid.className = "grid all";
+
+        if (!inprogress.length){
+          empty.style.display = "block";
+          empty.textContent = "Ingen livekamper akkurat nå.";
+          return;
+        }
+        empty.style.display = "none";
+
+        inprogress
+          .slice()
+          .sort((a, b) => (b.change_ts ?? 0) - (a.change_ts ?? 0))
+          .forEach(m => grid.appendChild(renderCompactCard(m)));
+      } else {
+        grid.className = "grid selected";
+        const orderedLiveSelected = getOrderedLiveSelectedMatches(inprogress);
+        updateSelectedDensity(orderedLiveSelected.length);
+
+        if (!orderedLiveSelected.length){
+          empty.style.display = "block";
+          empty.textContent = "Ingen valgte livekamper akkurat nå.";
+          return;
+        }
+        empty.style.display = "none";
+        orderedLiveSelected.forEach(m => grid.appendChild(renderSelectedCard(m)));
+      }
+    }
+
+    function cleanupCaches(){
+      const inprogress = liveMatches.filter(m => m.status_type === "inprogress");
+      const liveIds = new Set(inprogress.map(m => String(m.event_id)));
+
+      let changed = false;
+      for (const key of lastMomentumByEvent.keys()){
+        if (!liveIds.has(key) && !followedSet.has(key)){
+          lastMomentumByEvent.delete(key);
+          changed = true;
+        }
+      }
+      if (changed) saveMomentumCache();
+
+      const selectedIds = new Set(getOrderedLiveSelectedMatches(inprogress).map(m => String(m.event_id)));
+
+      let expandedChanged = false;
+      for (const id of Array.from(expandedMatches)){
+        if (!selectedIds.has(id)){
+          expandedMatches.delete(id);
+          expandedChanged = true;
+        }
+      }
+      if (expandedChanged) saveExpandedMatches();
+
+      let alertChanged = false;
+      for (const id of Array.from(alertedLiveMatches)){
+        if (!liveIds.has(id)){
+          alertedLiveMatches.delete(id);
+          alertChanged = true;
+        }
+      }
+      if (alertChanged) saveAlertedLiveMatches();
+
+      let hiddenChanged = false;
+      for (const id of Array.from(hiddenAutoMatches)){
+        if (!liveIds.has(id)){
+          hiddenAutoMatches.delete(id);
+          hiddenChanged = true;
+        }
+      }
+      if (hiddenChanged) saveHiddenAutoMatches();
+    }
+
+    function renderError(err){
+      liveMatches = [];
+      updateTabLabels();
+      render();
+
+      const empty = document.getElementById("empty");
+      empty.style.display = "block";
+      empty.textContent = `Kunne ikke hente livekamper (${err.message}).`;
+      setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
+      ensureWakeLock();
+    }
+
+    async function refresh(){
+      if (refreshInFlight) return;
+      refreshInFlight = true;
+
+      try {
+        const [liveData, teamsData] = await Promise.all([fetchLive(), fetchTeams()]);
+        liveMatches = liveData;
+        buildFavoriteTeams(teamsData);
+
+        const inprogress = liveMatches.filter(m => m.status_type === "inprogress");
+        maybeVibrateForNewFavoriteLiveMatches(inprogress);
+
+        cleanupCaches();
+        updateTabLabels();
+        render();
+        setLastUpdated(`Oppdatert ${new Date().toLocaleTimeString("no-NO", {
+          hour:"2-digit", minute:"2-digit", second:"2-digit"
+        })}`);
+        ensureWakeLock();
+      } catch (err) {
+        renderError(err);
+      } finally {
+        refreshInFlight = false;
+      }
+    }
+
+    document.getElementById("tabAll").addEventListener("click", () => setActiveTab("all"));
+    document.getElementById("tabSelected").addEventListener("click", () => setActiveTab("selected"));
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+    initTheme();
+    setActiveTab("selected");
+    refresh();
+    setInterval(refresh, 10000);
+  </script>
 </body>
 </html>
