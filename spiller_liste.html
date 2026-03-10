@@ -20,6 +20,8 @@
       --pillBg:#eef2f7;
       --pillBorder:rgba(31,41,55,.08);
       --accent:#2563eb;
+      --progressBg:rgba(255,255,255,.18);
+      --progressFill:#22c55e;
     }
 
     body.dark{
@@ -37,10 +39,13 @@
       --pillBg:#303a49;
       --pillBorder:rgba(255,255,255,.08);
       --accent:#93c5fd;
+      --progressBg:rgba(255,255,255,.14);
+      --progressFill:#4ade80;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
+
     body{
       margin:0;
       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
@@ -119,6 +124,33 @@
       flex:0 0 auto;
       cursor:pointer;
       padding:0;
+    }
+
+    #progressWrap{
+      max-width:1100px;
+      margin:0 auto;
+      height:4px;
+      background:var(--progressBg);
+      overflow:hidden;
+      border-radius:999px;
+    }
+
+    #progressBar{
+      height:100%;
+      width:0%;
+      background:var(--progressFill);
+      transition:width .25s ease;
+    }
+
+    #progressText{
+      max-width:1100px;
+      margin:6px auto 0;
+      padding:0 10px;
+      text-align:center;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      min-height:16px;
     }
 
     main{
@@ -248,6 +280,9 @@
       font-size:20px;
       font-weight:950;
       line-height:1;
+      min-height:24px;
+      display:grid;
+      place-items:center;
     }
 
     .clubRow{
@@ -332,6 +367,9 @@
       font-size:16px;
       font-weight:950;
       line-height:1;
+      min-height:18px;
+      display:grid;
+      place-items:center;
     }
 
     .playerLink{
@@ -348,13 +386,25 @@
       font-size:10px;
       color:var(--muted);
       font-weight:700;
+      min-height:14px;
     }
 
-    .loadingNote{
-      margin-top:8px;
-      font-size:10px;
-      color:var(--muted);
-      font-weight:700;
+    .loadingSpinner{
+      width:16px;
+      height:16px;
+      border:2px solid rgba(0,0,0,.12);
+      border-top:2px solid var(--accent);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+
+    body.dark .loadingSpinner{
+      border-color:rgba(255,255,255,.12);
+      border-top-color:var(--accent);
+    }
+
+    @keyframes spin{
+      to{ transform:rotate(360deg); }
     }
 
     .empty{
@@ -406,7 +456,7 @@
       </div>
       <div class="headRight">
         <div class="headButtons">
-          <a class="navIcon" href="index.html" title="Live" aria-label="Live">🏐</a>
+          <a class="navIcon" href="live-index.html" title="Live" aria-label="Live">🏐</a>
           <a class="navIcon" href="dagens_kamper.html" title="Dagens kamper" aria-label="Dagens kamper">📅</a>
           <a class="navIcon" href="lag.html" title="Lag" aria-label="Lag">⭐</a>
           <a class="navIcon" href="spiller_liste.html" title="Spillere" aria-label="Spillere">👤</a>
@@ -416,6 +466,9 @@
       </div>
     </div>
   </header>
+
+  <div id="progressWrap"><div id="progressBar"></div></div>
+  <div id="progressText"></div>
 
   <main>
     <div class="toolbar">
@@ -438,6 +491,9 @@
     let allRows = [];
     const summaryCache = new Map();
     const teamEventsCache = new Map();
+
+    let finishedPlayers = 0;
+    let totalPlayers = 0;
 
     function loadTheme(){
       try { return localStorage.getItem(THEME_KEY) || ""; }
@@ -472,6 +528,23 @@
 
     function setLastUpdated(text){
       document.getElementById("lastUpdated").textContent = text;
+    }
+
+    function updateProgress(){
+      const percent = totalPlayers ? Math.round((finishedPlayers / totalPlayers) * 100) : 0;
+      document.getElementById("progressBar").style.width = `${percent}%`;
+
+      const progressText = document.getElementById("progressText");
+      if (!totalPlayers){
+        progressText.textContent = "";
+        return;
+      }
+
+      if (finishedPlayers < totalPlayers){
+        progressText.textContent = `Laster statistikk ${finishedPlayers}/${totalPlayers}`;
+      } else {
+        progressText.textContent = "Alle spillere ferdig lastet";
+      }
     }
 
     async function getJson(url){
@@ -654,6 +727,10 @@
       };
     }
 
+    function spinnerMarkup(){
+      return `<div class="loadingSpinner"></div>`;
+    }
+
     function createCardSkeleton(row){
       const card = document.createElement("div");
       card.className = "card";
@@ -694,7 +771,7 @@
       totalBox.className = "totalBox";
       totalBox.innerHTML = `
         <div class="totalLabel">Totalt</div>
-        <div class="totalValue" data-role="total">…</div>
+        <div class="totalValue" data-role="total">${spinnerMarkup()}</div>
       `;
 
       topRow.appendChild(info);
@@ -723,24 +800,24 @@
       statsRow.innerHTML = `
         <div class="statBox">
           <div class="statLabel">Totalt</div>
-          <div class="statValue" data-role="total2">…</div>
+          <div class="statValue" data-role="total2">${spinnerMarkup()}</div>
         </div>
         <div class="statBox">
           <div class="statLabel">Angrep</div>
-          <div class="statValue" data-role="attack">…</div>
+          <div class="statValue" data-role="attack">${spinnerMarkup()}</div>
         </div>
         <div class="statBox">
           <div class="statLabel">Blokk</div>
-          <div class="statValue" data-role="block">…</div>
+          <div class="statValue" data-role="block">${spinnerMarkup()}</div>
         </div>
         <div class="statBox">
           <div class="statLabel">Serve</div>
-          <div class="statValue" data-role="serve">…</div>
+          <div class="statValue" data-role="serve">${spinnerMarkup()}</div>
         </div>
       `;
 
       const note = document.createElement("div");
-      note.className = "loadingNote";
+      note.className = "smallNote";
       note.dataset.role = "note";
       note.textContent = "Henter statistikk …";
 
@@ -761,8 +838,6 @@
       card.querySelector('[data-role="serve"]').textContent = stats.serve;
 
       const note = card.querySelector('[data-role="note"]');
-      note.className = "smallNote";
-
       if (stats.matchedGames === 0){
         note.textContent = "Det finnes ikke statistikk for denne spilleren.";
       } else {
@@ -851,6 +926,8 @@
       const stats = await buildSeasonTotalsForPlayer(row.player, row.team);
       row.stats = stats;
       updateCardStats(row.card, stats);
+      finishedPlayers += 1;
+      updateProgress();
       rerenderSorted();
     }
 
@@ -896,6 +973,10 @@
           return row;
         });
 
+        totalPlayers = allRows.length;
+        finishedPlayers = 0;
+        updateProgress();
+
         sortRows();
         renderList(allRows);
 
@@ -907,6 +988,11 @@
           })}`
         );
 
+        if (!allRows.length){
+          document.getElementById("progressText").textContent = "Ingen spillere funnet";
+          return;
+        }
+
         await runQueue(allRows, 4);
       } catch (err){
         document.getElementById("grid").innerHTML = "";
@@ -914,6 +1000,7 @@
         empty.style.display = "block";
         empty.textContent = `Kunne ikke hente spillerliste (${err.message}).`;
         document.getElementById("count").textContent = "Feil";
+        document.getElementById("progressText").textContent = "Kunne ikke laste statistikk";
         setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
       }
     }
