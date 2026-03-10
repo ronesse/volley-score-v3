@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Lag</title>
+  <style>
+    :root{
+      color-scheme: light;
+      --bgTop:#243048;
+      --bg:#edf1f5;
+      --card:#f7f8fa;
+      --card2:#f2f4f7;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(31,41,55,.08);
+      --shadow:0 7px 18px rgba(15,23,42,.06);
+
+      --toggleBg:rgba(255,255,255,.10);
+      --toggleBorder:rgba(255,255,255,.14);
+
+      --mizunoBg:rgba(59,130,246,.10);
+      --mizunoBorder:rgba(59,130,246,.18);
+      --mizunoText:#2563eb;
+
+      --abroadBg:rgba(245,158,11,.10);
+      --abroadBorder:rgba(245,158,11,.18);
+      --abroadText:#b45309;
+
+      --pillBg:#eef2f7;
+      --pillBorder:rgba(31,41,55,.08);
+      --playerBg:#eef6ff;
+      --playerBorder:rgba(59,130,246,.12);
+      --link:#2563eb;
+    }
+
+    body.dark{
+      color-scheme: dark;
+      --bgTop:#1f2937;
+      --bg:#2b3442;
+      --card:#364152;
+      --card2:#313b4b;
+      --text:#e7ebf1;
+      --muted:#b3bdc9;
+      --line:rgba(255,255,255,.08);
+      --shadow:0 7px 18px rgba(0,0,0,.14);
+
+      --toggleBg:rgba(255,255,255,.07);
+      --toggleBorder:rgba(255,255,255,.10);
+
+      --mizunoBg:rgba(59,130,246,.12);
+      --mizunoBorder:rgba(96,165,250,.18);
+      --mizunoText:#93c5fd;
+
+      --abroadBg:rgba(245,158,11,.12);
+      --abroadBorder:rgba(251,191,36,.16);
+      --abroadText:#fbbf24;
+
+      --pillBg:#303a49;
+      --pillBorder:rgba(255,255,255,.08);
+      --playerBg:#334155;
+      --playerBorder:rgba(148,163,184,.18);
+      --link:#93c5fd;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(180deg,var(--bgTop) 0%,var(--bgTop) 98px,var(--bg) 98px,var(--bg) 100%);
+      color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    header{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 10px 10px;
+      color:#fff;
+    }
+    .headRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .headLeft{min-width:0}
+    .headRight{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+      flex:0 0 auto;
+    }
+    h1{
+      margin:0;
+      font-size:17px;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .sub{
+      margin:4px 0 0;
+      font-size:11px;
+      line-height:1.25;
+      color:rgba(255,255,255,.78);
+    }
+    .lastUpdated{
+      font-size:10px;
+      white-space:nowrap;
+      color:rgba(255,255,255,.75);
+      text-align:right;
+    }
+
+.headButtons{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+}
+
+.navIcon,
+.themeToggle{
+  appearance:none;
+  border:1px solid var(--toggleBorder);
+  background:var(--toggleBg);
+  color:#fff;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  backdrop-filter:blur(6px);
+  font-size:15px;
+  font-weight:900;
+  line-height:1;
+  flex:0 0 auto;
+  cursor:pointer;
+  padding:0;
+}
+
+.navIcon:active,
+.themeToggle:active{
+  transform:scale(.98);
+}
+
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:10px;
+    }
+
+    .summaryBar{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .summaryItem{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      box-shadow:var(--shadow);
+    }
+    .summaryLabel{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+    .summaryValue{
+      margin-top:4px;
+      font-size:20px;
+      font-weight:950;
+      line-height:1;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .chip{
+      appearance:none;
+      border:1px solid var(--pillBorder);
+      background:var(--pillBg);
+      color:var(--text);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .chip.active{
+      outline:2px solid rgba(59,130,246,.18);
+    }
+
+    .grid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:1fr;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      box-shadow:var(--shadow);
+    }
+
+    .topRow{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:10px;
+      align-items:start;
+    }
+
+    .logoWrap{
+      width:58px;
+      height:58px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:var(--card2);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .logoWrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      padding:6px;
+    }
+    .fallbackBox{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      font-size:13px;
+      font-weight:900;
+      color:var(--muted);
+    }
+
+    .titleBlock{min-width:0}
+    .teamName{
+      font-size:14px;
+      font-weight:900;
+      line-height:1.15;
+      color:var(--link);
+      text-decoration:none;
+    }
+    .teamName:hover{
+      text-decoration:underline;
+    }
+    .teamMeta{
+      margin-top:4px;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.25;
+    }
+
+    .badges{
+      display:flex;
+      gap:4px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-self:start;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900;
+      line-height:1;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .badge.mizuno{
+      background:var(--mizunoBg);
+      border:1px solid var(--mizunoBorder);
+      color:var(--mizunoText);
+    }
+    .badge.abroad{
+      background:var(--abroadBg);
+      border:1px solid var(--abroadBorder);
+      color:var(--abroadText);
+    }
+
+    .details{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .detailBox{
+      background:var(--pillBg);
+      border:1px solid var(--pillBorder);
+      border-radius:12px;
+      padding:8px;
+      min-width:0;
+    }
+    .detailLabel{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+      margin-bottom:4px;
+    }
+    .detailValue{
+      font-size:11px;
+      font-weight:800;
+      line-height:1.25;
+      word-break:break-word;
+    }
+    .detailValue a{
+      color:var(--link);
+      text-decoration:none;
+    }
+    .detailValue a:hover{
+      text-decoration:underline;
+    }
+
+    .playersSection{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px solid var(--line);
+    }
+    .playersTitle{
+      font-size:11px;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+    .playerGrid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:8px;
+    }
+    .playerCard{
+      background:var(--playerBg);
+      border:1px solid var(--playerBorder);
+      border-radius:12px;
+      padding:8px;
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:8px;
+      align-items:center;
+    }
+    .playerPhoto{
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      overflow:hidden;
+      background:var(--card2);
+      border:1px solid var(--line);
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .playerPhoto img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .playerPhotoFallback{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+    }
+    .playerInfo{
+      min-width:0;
+    }
+    .playerName{
+      font-size:11px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .playerMeta{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.2;
+    }
+    .playerInfo a{
+      color:var(--link);
+      text-decoration:none;
+    }
+    .playerInfo a:hover{
+      text-decoration:underline;
+    }
+
+    .empty{
+      padding:16px;
+      border-radius:16px;
+      text-align:center;
+      background:var(--card);
+      border:1px dashed var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (min-width:760px){
+      .grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:640px){
+      .summaryBar{
+        grid-template-columns:repeat(2,1fr);
+      }
+      .topRow{
+        grid-template-columns:auto 1fr;
+      }
+      .badges{
+        grid-column:1 / -1;
+        justify-content:flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="headRow">
+      <div class="headLeft">
+        <h1>Lag</h1>
+        <p class="sub">Hele teams-tabellen, med logo og norske spillere på abroad-lag</p>
+      </div>
+      <div class="headRight">
+<div class="headButtons">
+  <a class="navIcon" href="live-index.html" title="Live" aria-label="Live">🏐</a>
+  <a class="navIcon" href="dagens_kamper.html" title="Dagens kamper" aria-label="Dagens kamper">📅</a>
+  <a class="navIcon" href="lag.html" title="Lag" aria-label="Lag">⭐</a>
+  <a class="navIcon" href="lag.html" title="Spillere" aria-label="Spillere">👤</a>
+  <button id="themeToggle" class="themeToggle" type="button" aria-label="Bytt tema" title="Bytt dag/natt">🌙</button>
+</div>
+        <div id="lastUpdated" class="lastUpdated"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="summaryBar">
+      <div class="summaryItem">
+        <div class="summaryLabel">Lag totalt</div>
+        <div id="summaryTotal" class="summaryValue">0</div>
+      </div>
+      <div class="summaryItem">
+        <div class="summaryLabel">Mizuno</div>
+        <div id="summaryMizuno" class="summaryValue">0</div>
+      </div>
+      <div class="summaryItem">
+        <div class="summaryLabel">Abroad</div>
+        <div id="summaryAbroad" class="summaryValue">0</div>
+      </div>
+      <div class="summaryItem">
+        <div class="summaryLabel">Norske spillere</div>
+        <div id="summaryPlayers" class="summaryValue">0</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="chip active" data-filter="all" type="button">Alle</button>
+      <button class="chip" data-filter="mizuno" type="button">Mizuno</button>
+      <button class="chip" data-filter="abroad" type="button">Abroad</button>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none"></div>
+  </main>
+
+  <script>
+    const TEAMS_API_URL = "https://volleyball.ronesse.no/teams?limit=200&offset=0";
+    const PLAYERS_API_URL = "https://volleyball.ronesse.no/players?limit=1000&offset=0";
+    const TEAM_LOGO_BASE = "https://volleyball.ronesse.no/img/teams";
+    const PLAYER_IMG_BASE = "https://volleyball.ronesse.no/img/players";
+    const THEME_KEY = "volley_theme_v1";
+
+    let teams = [];
+    let players = [];
+    let currentFilter = "all";
+
+    function loadTheme(){
+      try { return localStorage.getItem(THEME_KEY) || ""; }
+      catch { return ""; }
+    }
+
+    function saveTheme(theme){
+      try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    }
+
+    function applyTheme(theme){
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      const btn = document.getElementById("themeToggle");
+      btn.textContent = dark ? "☀️" : "🌙";
+      btn.title = dark ? "Bytt til dagmodus" : "Bytt til nattmodus";
+      btn.setAttribute("aria-label", btn.title);
+    }
+
+    function initTheme(){
+      const saved = loadTheme();
+      if (saved === "dark" || saved === "light"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme(){
+      const next = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      saveTheme(next);
+    }
+
+    function setLastUpdated(text){
+      document.getElementById("lastUpdated").textContent = text;
+    }
+
+    async function getJson(url){
+      const res = await fetch(url, {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    function logoUrl(sofaTeamId){
+      return `${TEAM_LOGO_BASE}/${sofaTeamId}.png`;
+    }
+
+    function createLogo(sofaTeamId, fallbackText = ""){
+      const wrap = document.createElement("div");
+      wrap.className = "logoWrap";
+
+      const img = document.createElement("img");
+      img.alt = "Laglogo";
+      img.loading = "lazy";
+      img.src = logoUrl(sofaTeamId);
+
+      img.onerror = () => {
+        wrap.innerHTML = "";
+        const fb = document.createElement("div");
+        fb.className = "fallbackBox";
+        fb.textContent = fallbackText;
+        wrap.appendChild(fb);
+      };
+
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function playerImageCandidates(playerId){
+      return [
+        `${PLAYER_IMG_BASE}/${playerId}.jpg`,
+        `${PLAYER_IMG_BASE}/${playerId}.png`,
+        `${PLAYER_IMG_BASE}/${playerId}.jpeg`,
+        `${PLAYER_IMG_BASE}/${playerId}.webp`
+      ];
+    }
+
+    function createPlayerPhoto(player){
+      const wrap = document.createElement("div");
+      wrap.className = "playerPhoto";
+
+      const fallback = () => {
+        wrap.innerHTML = `<div class="playerPhotoFallback">${String(player.name || "?").slice(0,1).toUpperCase()}</div>`;
+      };
+
+      const candidates = playerImageCandidates(player.id);
+      let idx = 0;
+
+      const img = document.createElement("img");
+      img.alt = player.name || "Spiller";
+      img.loading = "lazy";
+      img.onerror = () => {
+        idx += 1;
+        if (idx < candidates.length) img.src = candidates[idx];
+        else fallback();
+      };
+
+      if (!candidates.length){
+        fallback();
+        return wrap;
+      }
+
+      img.src = candidates[0];
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function normalize(v){
+      return String(v ?? "").trim().toLowerCase();
+    }
+
+    function getNorwegianPlayersForTeam(team){
+      const teamId = String(team.id ?? "").trim();
+      const sofaTeamId = String(team.sofascore_team_id ?? "").trim();
+
+      return players
+        .filter(player => {
+          const nationality = normalize(player.nationality);
+          if (nationality !== "norge" && nationality !== "norway") return false;
+
+          const playerTeamId = String(player.team_id ?? "").trim();
+          const playerSofaTeamId = String(player.sofa_team_id ?? "").trim();
+
+          return (
+            (teamId && playerTeamId && playerTeamId === teamId) ||
+            (sofaTeamId && playerSofaTeamId && playerSofaTeamId === sofaTeamId)
+          );
+        })
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "no"));
+    }
+
+    function updateSummary(){
+      const total = teams.length;
+      const mizuno = teams.filter(t => normalize(t.group_type) === "mizuno").length;
+      const abroad = teams.filter(t => normalize(t.group_type) === "abroad").length;
+
+      let totalNorwegianPlayers = 0;
+      for (const team of teams){
+        if (normalize(team.group_type) !== "abroad") continue;
+        totalNorwegianPlayers += getNorwegianPlayersForTeam(team).length;
+      }
+
+      document.getElementById("summaryTotal").textContent = String(total);
+      document.getElementById("summaryMizuno").textContent = String(mizuno);
+      document.getElementById("summaryAbroad").textContent = String(abroad);
+      document.getElementById("summaryPlayers").textContent = String(totalNorwegianPlayers);
+    }
+
+    function createBadge(groupType){
+      const el = document.createElement("div");
+      el.className = `badge ${groupType}`;
+      el.textContent = groupType;
+      return el;
+    }
+
+    function renderPlayerCard(player){
+      const card = document.createElement("div");
+      card.className = "playerCard";
+
+      const photo = createPlayerPhoto(player);
+
+      const info = document.createElement("div");
+      info.className = "playerInfo";
+
+      const name = document.createElement("div");
+      name.className = "playerName";
+
+      const a = document.createElement("a");
+      a.href =
+        `spiller.html?player_id=${encodeURIComponent(String(player.id ?? ""))}` +
+        `&player_name=${encodeURIComponent(String(player.name ?? ""))}`;
+      a.textContent = player.name || "Ukjent spiller";
+      name.appendChild(a);
+
+      const meta = document.createElement("div");
+      meta.className = "playerMeta";
+
+      const parts = [];
+      if (player.position) parts.push(player.position);
+      if (player.birth_year) parts.push(player.birth_year);
+      if (player.youth_club) parts.push(`Ungdomsklubb: ${player.youth_club}`);
+      meta.textContent = parts.length ? parts.join(" · ") : "Norsk spiller";
+
+      info.appendChild(name);
+      info.appendChild(meta);
+
+      card.appendChild(photo);
+      card.appendChild(info);
+
+      return card;
+    }
+
+    function renderCard(team){
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const topRow = document.createElement("div");
+      topRow.className = "topRow";
+
+      const sofaId = String(team.sofascore_team_id ?? "").trim();
+      const logo = createLogo(sofaId, (team.name || "?").slice(0,1).toUpperCase());
+
+      const titleBlock = document.createElement("div");
+      titleBlock.className = "titleBlock";
+
+      const teamNameLink = document.createElement("a");
+      teamNameLink.className = "teamName";
+      teamNameLink.href =
+        `lag_kamper.html?team_id=${encodeURIComponent(String(team.id ?? ""))}` +
+        `&sofa_team_id=${encodeURIComponent(String(team.sofascore_team_id ?? ""))}` +
+        `&team_name=${encodeURIComponent(String(team.name ?? ""))}`;
+      teamNameLink.textContent = team.name || "Ukjent lag";
+
+      const teamMeta = document.createElement("div");
+      teamMeta.className = "teamMeta";
+      teamMeta.textContent = `${team.country || ""}${team.league ? ` · ${team.league}` : ""}`;
+
+      titleBlock.appendChild(teamNameLink);
+      titleBlock.appendChild(teamMeta);
+
+      const badges = document.createElement("div");
+      badges.className = "badges";
+      const groupType = normalize(team.group_type);
+      if (groupType === "mizuno" || groupType === "abroad"){
+        badges.appendChild(createBadge(groupType));
+      }
+
+      topRow.appendChild(logo);
+      topRow.appendChild(titleBlock);
+      topRow.appendChild(badges);
+
+      const details = document.createElement("div");
+      details.className = "details";
+
+      const homepageBox = document.createElement("div");
+      homepageBox.className = "detailBox";
+
+      const homepageLabel = document.createElement("div");
+      homepageLabel.className = "detailLabel";
+      homepageLabel.textContent = "Hjemmeside";
+
+      const homepageValue = document.createElement("div");
+      homepageValue.className = "detailValue";
+
+      if (team.homepage_url){
+        const a = document.createElement("a");
+        a.href = team.homepage_url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = team.homepage_url;
+        homepageValue.appendChild(a);
+      } else {
+        homepageValue.textContent = "—";
+      }
+
+      homepageBox.appendChild(homepageLabel);
+      homepageBox.appendChild(homepageValue);
+
+      details.appendChild(homepageBox);
+
+      card.appendChild(topRow);
+      card.appendChild(details);
+
+      if (groupType === "abroad"){
+        const norwegianPlayers = getNorwegianPlayersForTeam(team);
+
+        const playersSection = document.createElement("div");
+        playersSection.className = "playersSection";
+
+        const title = document.createElement("div");
+        title.className = "playersTitle";
+        title.textContent = "Norske spillere";
+
+        playersSection.appendChild(title);
+
+        if (norwegianPlayers.length){
+          const playerGrid = document.createElement("div");
+          playerGrid.className = "playerGrid";
+          norwegianPlayers.forEach(player => {
+            playerGrid.appendChild(renderPlayerCard(player));
+          });
+          playersSection.appendChild(playerGrid);
+        } else {
+          const empty = document.createElement("div");
+          empty.className = "detailValue";
+          empty.style.color = "var(--muted)";
+          empty.textContent = "Ingen norske spillere funnet i /players.";
+          playersSection.appendChild(empty);
+        }
+
+        card.appendChild(playersSection);
+      }
+
+      return card;
+    }
+
+    function render(){
+      const grid = document.getElementById("grid");
+      const empty = document.getElementById("empty");
+      grid.innerHTML = "";
+
+      const filtered = teams.filter(team => {
+        const g = normalize(team.group_type);
+        if (currentFilter === "all") return true;
+        return g === currentFilter;
+      });
+
+      if (!filtered.length){
+        empty.style.display = "block";
+        empty.textContent = "Ingen lag å vise.";
+        return;
+      }
+
+      empty.style.display = "none";
+
+      filtered
+        .slice()
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "no"))
+        .forEach(team => grid.appendChild(renderCard(team)));
+    }
+
+    function setFilter(filter){
+      currentFilter = filter;
+      document.querySelectorAll(".chip").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filter === filter);
+      });
+      render();
+    }
+
+    async function refresh(){
+      try{
+        const [teamsData, playersData] = await Promise.all([
+          getJson(TEAMS_API_URL),
+          getJson(PLAYERS_API_URL)
+        ]);
+
+        teams = Array.isArray(teamsData) ? teamsData : [];
+        players = Array.isArray(playersData) ? playersData : [];
+
+        updateSummary();
+        render();
+
+        setLastUpdated(
+          `Oppdatert ${new Date().toLocaleTimeString("no-NO", {
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit"
+          })}`
+        );
+      } catch (err){
+        document.getElementById("grid").innerHTML = "";
+        document.getElementById("empty").style.display = "block";
+        document.getElementById("empty").textContent = `Kunne ikke hente lagoversikt (${err.message}).`;
+        setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
+      }
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    document.querySelectorAll(".chip").forEach(btn => {
+      btn.addEventListener("click", () => setFilter(btn.dataset.filter));
+    });
+
+    initTheme();
+    refresh();
+    setInterval(refresh, 60000);
+  </script>
+</body>
+</html>
