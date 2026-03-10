@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Lagkamper</title>
+  <style>
+    :root{
+      color-scheme: light;
+      --bgTop:#243048;
+      --bg:#edf1f5;
+      --card:#f7f8fa;
+      --card2:#f2f4f7;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(31,41,55,.08);
+      --shadow:0 7px 18px rgba(15,23,42,.06);
+      --toggleBg:rgba(255,255,255,.10);
+      --toggleBorder:rgba(255,255,255,.14);
+      --pillBg:#eef2f7;
+      --live:#22c55e;
+      --liveBg:#edf9f1;
+      --liveBorder:rgba(34,197,94,.18);
+      --summaryBg:#f8fafc;
+      --summaryBorder:rgba(31,41,55,.08);
+      --link:#2563eb;
+    }
+
+    body.dark{
+      color-scheme: dark;
+      --bgTop:#1f2937;
+      --bg:#2b3442;
+      --card:#364152;
+      --card2:#313b4b;
+      --text:#e7ebf1;
+      --muted:#b3bdc9;
+      --line:rgba(255,255,255,.08);
+      --shadow:0 7px 18px rgba(0,0,0,.14);
+      --toggleBg:rgba(255,255,255,.07);
+      --toggleBorder:rgba(255,255,255,.10);
+      --pillBg:#303a49;
+      --live:#4ade80;
+      --liveBg:rgba(74,222,128,.12);
+      --liveBorder:rgba(74,222,128,.16);
+      --summaryBg:#2f3948;
+      --summaryBorder:rgba(255,255,255,.08);
+      --link:#93c5fd;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(180deg,var(--bgTop) 0%,var(--bgTop) 98px,var(--bg) 98px,var(--bg) 100%);
+      color:var(--text);
+    }
+
+    header{
+      max-width:980px;
+      margin:0 auto;
+      padding:12px 10px 10px;
+      color:#fff;
+    }
+
+    .headRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .headButtons{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .headLink,
+    .themeToggle{
+      appearance:none;
+      border:1px solid var(--toggleBorder);
+      background:var(--toggleBg);
+      color:#fff;
+      min-height:38px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:12px;
+      line-height:1;
+      text-decoration:none;
+      backdrop-filter:blur(6px);
+      padding:0 12px;
+      font-weight:900;
+    }
+    .themeToggle{
+      width:38px;
+      padding:0;
+      font-size:16px;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+    .sub{
+      margin:4px 0 0;
+      font-size:11px;
+      color:rgba(255,255,255,.8);
+    }
+    .lastUpdated{
+      font-size:10px;
+      color:rgba(255,255,255,.75);
+      text-align:right;
+      margin-top:8px;
+    }
+
+    main{
+      max-width:980px;
+      margin:0 auto;
+      padding:10px;
+    }
+
+    .teamHeader{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:12px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .logoWrap{
+      width:62px;
+      height:62px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:var(--card2);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .logoWrap.small{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+    }
+    .logoWrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      padding:6px;
+    }
+    .logoWrap.small img{
+      padding:4px;
+    }
+
+    .fallbackBox{
+      font-size:14px;
+      font-weight:900;
+      color:var(--muted);
+    }
+    .logoWrap.small .fallbackBox{
+      font-size:11px;
+    }
+
+    .teamTitle{
+      font-size:18px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .teamMeta{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .section{
+      margin-top:14px;
+    }
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:0 0 8px;
+    }
+    .sectionTitle h2{
+      margin:0;
+      font-size:14px;
+      font-weight:900;
+    }
+    .sectionCount{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .list{
+      display:grid;
+      gap:8px;
+    }
+
+    .matchCard{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      box-shadow:var(--shadow);
+    }
+    .matchCard.is-clickable{
+      cursor:pointer;
+    }
+    .matchCard.is-clickable:hover{
+      transform:translateY(-1px);
+    }
+
+    .topLine{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:flex-start;
+      margin-bottom:8px;
+    }
+    .league{
+      font-size:11px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .meta{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.25;
+    }
+
+    .status{
+      flex:0 0 auto;
+      background:var(--pillBg);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:10px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .status.live{
+      background:var(--liveBg);
+      border-color:var(--liveBorder);
+      color:var(--live);
+    }
+
+    .teamsRow{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:8px;
+      align-items:center;
+    }
+
+    .teamCol{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+
+    .teamName{
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+      line-height:1.15;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
+    }
+
+    .centerBox{
+      min-width:104px;
+      background:var(--pillBg);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px 6px;
+      text-align:center;
+    }
+    .score{
+      font-size:18px;
+      font-weight:950;
+      line-height:1;
+    }
+    .time{
+      font-size:11px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .timeSub{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .summaryWrap{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px solid var(--line);
+      display:none;
+    }
+    .matchCard.expanded .summaryWrap{
+      display:block;
+    }
+
+    .summaryBox{
+      background:var(--summaryBg);
+      border:1px solid var(--summaryBorder);
+      border-radius:12px;
+      padding:10px;
+      font-size:12px;
+      line-height:1.5;
+    }
+    .summaryBox h1,
+    .summaryBox h2,
+    .summaryBox h3{
+      margin:0 0 8px;
+      font-size:14px;
+      line-height:1.3;
+    }
+    .summaryBox p{
+      margin:0 0 8px;
+    }
+    .summaryBox a{
+      color:var(--link);
+    }
+
+    .summaryLoading,
+    .summaryError,
+    .summaryEmpty{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .empty{
+      padding:16px;
+      border-radius:16px;
+      text-align:center;
+      background:var(--card);
+      border:1px dashed var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (max-width:520px){
+      .logoWrap{
+        width:56px;
+        height:56px;
+      }
+      .logoWrap.small{
+        width:34px;
+        height:34px;
+      }
+      .centerBox{
+        min-width:94px;
+      }
+      .score{
+        font-size:16px;
+      }
+      .teamName{
+        font-size:11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="headRow">
+      <div>
+        <h1>Lagkamper</h1>
+        <p class="sub">Trykk på en ferdig kamp for å vise kampreferat</p>
+      </div>
+      <div>
+        <div class="headButtons">
+          <a class="headLink" href="lag.html">⭐ Lag</a>
+          <a class="headLink" href="live-index.html">🏐 Live</a>
+          <a class="headLink" href="dagens_kamper.html">📅 Dagens</a>
+          <button id="themeToggle" class="themeToggle" type="button">🌙</button>
+        </div>
+        <div id="lastUpdated" class="lastUpdated"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="teamHeader" class="teamHeader" style="display:none"></div>
+
+    <section class="section">
+      <div class="sectionTitle">
+        <h2>Kommende kamper</h2>
+        <div id="countUpcoming" class="sectionCount">0 kamper</div>
+      </div>
+      <div id="upcomingList" class="list"></div>
+    </section>
+
+    <section class="section">
+      <div class="sectionTitle">
+        <h2>Tidligere kamper</h2>
+        <div id="countPast" class="sectionCount">0 kamper</div>
+      </div>
+      <div id="pastList" class="list"></div>
+    </section>
+
+    <div id="empty" class="empty" style="display:none"></div>
+  </main>
+
+  <script>
+    const TEAMS_API_URL = "https://volleyball.ronesse.no/teams?limit=200&offset=0";
+    const EVENTS_API_BASE = "https://volleyball.ronesse.no/events";
+    const TEAM_LOGO_BASE = "https://volleyball.ronesse.no/img/teams";
+    const THEME_KEY = "volley_theme_v1";
+
+    let openSummaryEventId = null;
+    const summaryCache = new Map();
+    let currentRenderedEvents = [];
+
+    function qs(name){
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    function loadTheme(){
+      try { return localStorage.getItem(THEME_KEY) || ""; }
+      catch { return ""; }
+    }
+
+    function saveTheme(theme){
+      try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    }
+
+    function applyTheme(theme){
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      document.getElementById("themeToggle").textContent = dark ? "☀️" : "🌙";
+    }
+
+    function initTheme(){
+      const saved = loadTheme();
+      if (saved === "dark" || saved === "light"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme(){
+      const next = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      saveTheme(next);
+    }
+
+    function setLastUpdated(text){
+      document.getElementById("lastUpdated").textContent = text;
+    }
+
+    async function getJson(url){
+      const res = await fetch(url, {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    function logoUrl(sofaTeamId){
+      return `${TEAM_LOGO_BASE}/${sofaTeamId}.png`;
+    }
+
+    function createLogo(sofaTeamId, fallbackText = "", small = false){
+      const wrap = document.createElement("div");
+      wrap.className = "logoWrap" + (small ? " small" : "");
+
+      const img = document.createElement("img");
+      img.alt = "Laglogo";
+      img.loading = "lazy";
+      img.src = logoUrl(sofaTeamId);
+
+      img.onerror = () => {
+        wrap.innerHTML = `<div class="fallbackBox">${fallbackText}</div>`;
+      };
+
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function getEventDate(event){
+      if (event.start_ts != null){
+        const n = Number(event.start_ts);
+        if (!Number.isNaN(n)) return new Date(n * 1000);
+      }
+      if (event.start_utc){
+        const d = new Date(String(event.start_utc).replace(" ", "T"));
+        if (!Number.isNaN(d.getTime())) return d;
+      }
+      return null;
+    }
+
+    function formatDateTime(date){
+      if (!date) return "Ukjent tidspunkt";
+      return date.toLocaleString("no-NO", {
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+    }
+
+    function formatDateOnly(date){
+      if (!date) return "";
+      return date.toLocaleDateString("no-NO", {
+        weekday:"short",
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric"
+      });
+    }
+
+    function getStatusText(event){
+      const type = String(event.status_type || "").toLowerCase();
+      if (type === "finished") return "Ferdig";
+      if (type === "inprogress") return event.status_desc || "LIVE";
+      return "Planlagt";
+    }
+
+    function renderTeamHeader(name, country, league, sofaTeamId){
+      const el = document.getElementById("teamHeader");
+      el.style.display = "grid";
+      el.innerHTML = "";
+
+      el.appendChild(
+        createLogo(
+          sofaTeamId,
+          String(name || "?").slice(0,1).toUpperCase()
+        )
+      );
+
+      const block = document.createElement("div");
+      block.innerHTML = `
+        <div class="teamTitle">${name || "Lag"}</div>
+        <div class="teamMeta">${country || ""}${league ? ` · ${league}` : ""}</div>
+      `;
+      el.appendChild(block);
+    }
+
+    async function loadSummary(eventId){
+      const key = String(eventId);
+      if (summaryCache.has(key)) return summaryCache.get(key);
+
+      const result = { state: "loading", data: null, error: null };
+      summaryCache.set(key, result);
+
+      try{
+        const data = await getJson(`${EVENTS_API_BASE}/${encodeURIComponent(key)}/summary`);
+        const finalResult = { state: "ready", data, error: null };
+        summaryCache.set(key, finalResult);
+        return finalResult;
+      } catch (err){
+        const finalResult = { state: "error", data: null, error: err.message || "Ukjent feil" };
+        summaryCache.set(key, finalResult);
+        return finalResult;
+      }
+    }
+
+    function renderSummaryArea(event){
+      const wrap = document.createElement("div");
+      wrap.className = "summaryWrap";
+
+      const box = document.createElement("div");
+      box.className = "summaryBox";
+
+      const cached = summaryCache.get(String(event.event_id));
+
+      if (!cached || cached.state === "loading"){
+        box.innerHTML = `<div class="summaryLoading">Henter kampreferat …</div>`;
+      } else if (cached.state === "error"){
+        box.innerHTML = `<div class="summaryError">Kunne ikke hente kampreferat (${cached.error}).</div>`;
+      } else if (cached.data){
+        if (cached.data.summary_html){
+          box.innerHTML = cached.data.summary_html;
+        } else if (cached.data.summary){
+          box.textContent = cached.data.summary;
+        } else {
+          box.innerHTML = `<div class="summaryEmpty">Ingen kampreferat tilgjengelig.</div>`;
+        }
+      } else {
+        box.innerHTML = `<div class="summaryEmpty">Ingen kampreferat tilgjengelig.</div>`;
+      }
+
+      wrap.appendChild(box);
+      return wrap;
+    }
+
+    async function handleMatchClick(eventObj){
+      const type = String(eventObj.status_type || "").toLowerCase();
+      if (type !== "finished") return;
+
+      const eventId = String(eventObj.event_id);
+
+      if (openSummaryEventId === eventId){
+        openSummaryEventId = null;
+        window.__renderLagKamper?.();
+        return;
+      }
+
+      openSummaryEventId = eventId;
+      window.__renderLagKamper?.();
+
+      const cached = summaryCache.get(eventId);
+      if (!cached || cached.state === "loading"){
+        await loadSummary(eventId);
+        if (openSummaryEventId === eventId){
+          window.__renderLagKamper?.();
+        }
+      }
+    }
+
+    function renderMatch(event){
+      const type = String(event.status_type || "").toLowerCase();
+      const isFinished = type === "finished";
+
+      const card = document.createElement("div");
+      card.className = "matchCard" +
+        (String(event.event_id) === String(openSummaryEventId) ? " expanded" : "") +
+        (isFinished ? " is-clickable" : "");
+
+      if (isFinished){
+        card.addEventListener("click", () => { handleMatchClick(event); });
+      }
+
+      const top = document.createElement("div");
+      top.className = "topLine";
+
+      const date = getEventDate(event);
+
+      const left = document.createElement("div");
+      left.innerHTML = `
+        <div class="league">${event.tournament_name || "Kamp"}</div>
+        <div class="meta">
+          ${event.season_name || ""}${event.round ? ` · Runde ${event.round}` : ""}
+          ${formatDateOnly(date) ? ` · ${formatDateOnly(date)}` : ""}
+        </div>
+      `;
+
+      const status = document.createElement("div");
+      status.className = "status" + (type === "inprogress" ? " live" : "");
+      status.textContent = getStatusText(event);
+
+      top.appendChild(left);
+      top.appendChild(status);
+
+      const row = document.createElement("div");
+      row.className = "teamsRow";
+
+      const home = document.createElement("div");
+      home.className = "teamCol";
+      home.appendChild(createLogo(event.home_team_id, "H", true));
+      const homeName = document.createElement("div");
+      homeName.className = "teamName";
+      homeName.textContent = event.home_team_name || "Hjemme";
+      home.appendChild(homeName);
+
+      const center = document.createElement("div");
+      center.className = "centerBox";
+
+      if (type === "finished" || type === "inprogress"){
+        const sub = type === "inprogress"
+          ? (event.status_desc || "LIVE")
+          : `Spilt ${formatDateOnly(date)}`;
+
+        center.innerHTML = `
+          <div class="score">${event.home_sets ?? 0}-${event.away_sets ?? 0}</div>
+          <div class="timeSub">${sub}</div>
+        `;
+      } else {
+        center.innerHTML = `
+          <div class="time">${formatDateTime(date)}</div>
+          <div class="timeSub">Kampstart</div>
+        `;
+      }
+
+      const away = document.createElement("div");
+      away.className = "teamCol";
+      away.appendChild(createLogo(event.away_team_id, "B", true));
+      const awayName = document.createElement("div");
+      awayName.className = "teamName";
+      awayName.textContent = event.away_team_name || "Borte";
+      away.appendChild(awayName);
+
+      row.appendChild(home);
+      row.appendChild(center);
+      row.appendChild(away);
+
+      card.appendChild(top);
+      card.appendChild(row);
+
+      if (isFinished && String(event.event_id) === String(openSummaryEventId)){
+        card.appendChild(renderSummaryArea(event));
+      }
+
+      return card;
+    }
+
+    async function fetchEventsWindow(fromTs, toTs, offset = 0, limit = 1000){
+      const url = new URL(EVENTS_API_BASE);
+      url.searchParams.set("from_ts", String(fromTs));
+      url.searchParams.set("to_ts", String(toTs));
+      url.searchParams.set("limit", String(limit));
+      url.searchParams.set("offset", String(offset));
+      return await getJson(url.toString());
+    }
+
+    async function fetchRelevantEventsForSofaTeam(sofaTeamId){
+      const now = new Date();
+
+      const from = new Date(now);
+      from.setFullYear(from.getFullYear() - 1);
+
+      const to = new Date(now);
+      to.setFullYear(to.getFullYear() + 1);
+
+      const fromTs = Math.floor(from.getTime() / 1000);
+      const toTs = Math.floor(to.getTime() / 1000);
+
+      const all = [];
+      let offset = 0;
+      const limit = 1000;
+
+      while (true){
+        const batch = await fetchEventsWindow(fromTs, toTs, offset, limit);
+        const rows = Array.isArray(batch) ? batch : [];
+        all.push(...rows);
+
+        if (rows.length < limit) break;
+        offset += limit;
+        if (offset > 5000) break;
+      }
+
+      const target = String(sofaTeamId ?? "").trim();
+
+      const filtered = all.filter(event => {
+        const homeId = String(event.home_team_id ?? "").trim();
+        const awayId = String(event.away_team_id ?? "").trim();
+        return homeId === target || awayId === target;
+      });
+
+      const seen = new Set();
+      return filtered.filter(event => {
+        const id = String(event.event_id ?? "");
+        if (!id || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    }
+
+    function renderLists(events){
+      currentRenderedEvents = events.slice();
+
+      const sorted = events.slice().sort((a, b) => Number(a.start_ts || 0) - Number(b.start_ts || 0));
+      const now = Date.now();
+
+      const upcoming = [];
+      const past = [];
+
+      for (const ev of sorted){
+        const d = getEventDate(ev);
+        const type = String(ev.status_type || "").toLowerCase();
+
+        if (type === "inprogress" || (d && d.getTime() >= now && type !== "finished")){
+          upcoming.push(ev);
+        } else {
+          past.push(ev);
+        }
+      }
+
+      upcoming.sort((a, b) => Number(b.start_ts || 0) - Number(a.start_ts || 0));
+      past.sort((a, b) => Number(b.start_ts || 0) - Number(a.start_ts || 0));
+
+      const upcomingList = document.getElementById("upcomingList");
+      const pastList = document.getElementById("pastList");
+      const empty = document.getElementById("empty");
+
+      upcomingList.innerHTML = "";
+      pastList.innerHTML = "";
+
+      document.getElementById("countUpcoming").textContent = `${upcoming.length} kamper`;
+      document.getElementById("countPast").textContent = `${past.length} kamper`;
+
+      if (!events.length){
+        const sofaTeamId = qs("sofa_team_id");
+        empty.style.display = "block";
+        empty.textContent = `Ingen kamper funnet for sofascore_team_id ${sofaTeamId}.`;
+      } else {
+        empty.style.display = "none";
+      }
+
+      if (upcoming.length){
+        upcoming.forEach(ev => upcomingList.appendChild(renderMatch(ev)));
+      } else {
+        upcomingList.innerHTML = `<div class="empty">Ingen kommende kamper.</div>`;
+      }
+
+      if (past.length){
+        past.forEach(ev => pastList.appendChild(renderMatch(ev)));
+      } else {
+        pastList.innerHTML = `<div class="empty">Ingen tidligere kamper.</div>`;
+      }
+    }
+
+    window.__renderLagKamper = () => renderLists(currentRenderedEvents);
+
+    async function refresh(){
+      const teamId = qs("team_id");
+      const sofaTeamId = qs("sofa_team_id");
+      const teamName = qs("team_name");
+
+      if (!sofaTeamId){
+        document.getElementById("empty").style.display = "block";
+        document.getElementById("empty").textContent = "Mangler sofa_team_id i adressen.";
+        return;
+      }
+
+      try{
+        const teams = await getJson(TEAMS_API_URL);
+        const team = (Array.isArray(teams) ? teams : []).find(
+          t => String(t.id) === String(teamId)
+        );
+
+        const displayName = team?.name || teamName || "Lag";
+        const displayCountry = team?.country || "";
+        const displayLeague = team?.league || "";
+
+        renderTeamHeader(displayName, displayCountry, displayLeague, sofaTeamId);
+
+        const events = await fetchRelevantEventsForSofaTeam(sofaTeamId);
+        renderLists(events);
+
+        setLastUpdated(
+          `Oppdatert ${new Date().toLocaleTimeString("no-NO", {
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit"
+          })}`
+        );
+      } catch (err){
+        document.getElementById("empty").style.display = "block";
+        document.getElementById("empty").textContent = `Kunne ikke hente lagkamper (${err.message}).`;
+        setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
+      }
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+    initTheme();
+    refresh();
+  </script>
+</body>
+</html>
