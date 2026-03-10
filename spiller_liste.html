@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Spillerliste</title>
+  <style>
+    :root{
+      color-scheme: light;
+      --bgTop:#243048;
+      --bg:#edf1f5;
+      --card:#f7f8fa;
+      --card2:#f2f4f7;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(31,41,55,.08);
+      --shadow:0 8px 20px rgba(15,23,42,.06);
+      --toggleBg:rgba(255,255,255,.10);
+      --toggleBorder:rgba(255,255,255,.14);
+      --pillBg:#eef2f7;
+      --pillBorder:rgba(31,41,55,.08);
+      --accent:#2563eb;
+    }
+
+    body.dark{
+      color-scheme: dark;
+      --bgTop:#1f2937;
+      --bg:#2b3442;
+      --card:#364152;
+      --card2:#313b4b;
+      --text:#e7ebf1;
+      --muted:#b3bdc9;
+      --line:rgba(255,255,255,.08);
+      --shadow:0 8px 20px rgba(0,0,0,.15);
+      --toggleBg:rgba(255,255,255,.07);
+      --toggleBorder:rgba(255,255,255,.10);
+      --pillBg:#303a49;
+      --pillBorder:rgba(255,255,255,.08);
+      --accent:#93c5fd;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(180deg,var(--bgTop) 0%,var(--bgTop) 98px,var(--bg) 98px,var(--bg) 100%);
+      color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    header{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 10px 10px;
+      color:#fff;
+    }
+
+    .headRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .headLeft{min-width:0}
+    .headRight{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+      flex:0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .sub{
+      margin:4px 0 0;
+      font-size:11px;
+      color:rgba(255,255,255,.82);
+      line-height:1.35;
+    }
+
+    .lastUpdated{
+      font-size:10px;
+      color:rgba(255,255,255,.75);
+      text-align:right;
+    }
+
+    .headButtons{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:nowrap;
+    }
+
+    .navIcon,
+    .themeToggle{
+      appearance:none;
+      border:1px solid var(--toggleBorder);
+      background:var(--toggleBg);
+      color:#fff;
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      backdrop-filter:blur(6px);
+      font-size:15px;
+      font-weight:900;
+      line-height:1;
+      flex:0 0 auto;
+      cursor:pointer;
+      padding:0;
+    }
+
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:10px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .count{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .search{
+      appearance:none;
+      width:100%;
+      max-width:280px;
+      border:1px solid var(--line);
+      background:var(--card);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:12px;
+      font-weight:700;
+      outline:none;
+      box-shadow:var(--shadow);
+    }
+
+    .grid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:1fr;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:12px;
+      align-items:start;
+    }
+
+    .photoWrap{
+      width:72px;
+      height:72px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:var(--card2);
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+
+    .photoWrap img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .photoFallback{
+      font-size:18px;
+      font-weight:900;
+      color:var(--muted);
+    }
+
+    .mainCol{
+      min-width:0;
+    }
+
+    .topRow{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:start;
+    }
+
+    .playerName{
+      font-size:16px;
+      font-weight:950;
+      line-height:1.15;
+      margin:0;
+    }
+
+    .playerMeta{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .totalBox{
+      background:var(--pillBg);
+      border:1px solid var(--pillBorder);
+      border-radius:14px;
+      padding:8px 10px;
+      min-width:82px;
+      text-align:center;
+    }
+
+    .totalLabel{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.2px;
+    }
+
+    .totalValue{
+      margin-top:2px;
+      font-size:20px;
+      font-weight:950;
+      line-height:1;
+    }
+
+    .clubRow{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:8px;
+      align-items:center;
+      margin-top:10px;
+      padding:8px;
+      border-radius:14px;
+      background:var(--card2);
+      border:1px solid var(--line);
+    }
+
+    .clubLogo{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:var(--card);
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+
+    .clubLogo img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      padding:4px;
+    }
+
+    .clubFallback{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+    }
+
+    .clubName{
+      font-size:13px;
+      font-weight:900;
+      line-height:1.2;
+    }
+
+    .clubMeta{
+      margin-top:2px;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.25;
+    }
+
+    .statsRow{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .statBox{
+      background:var(--pillBg);
+      border:1px solid var(--pillBorder);
+      border-radius:14px;
+      padding:9px;
+      text-align:center;
+      min-width:0;
+    }
+
+    .statLabel{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.2px;
+      line-height:1.15;
+    }
+
+    .statValue{
+      margin-top:4px;
+      font-size:16px;
+      font-weight:950;
+      line-height:1;
+    }
+
+    .playerLink{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .playerLink:hover{
+      color:var(--accent);
+    }
+
+    .smallNote{
+      margin-top:8px;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .empty{
+      padding:16px;
+      border-radius:16px;
+      text-align:center;
+      background:var(--card);
+      border:1px dashed var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (min-width:780px){
+      .grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:560px){
+      .card{
+        grid-template-columns:1fr;
+      }
+
+      .photoWrap{
+        width:64px;
+        height:64px;
+      }
+
+      .topRow{
+        grid-template-columns:1fr;
+      }
+
+      .totalBox{
+        width:100%;
+      }
+
+      .statsRow{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="headRow">
+      <div class="headLeft">
+        <h1>Spillerliste</h1>
+        <p class="sub">Norske spillere i utlandet, summert fra kampreferater for hele sesongen</p>
+      </div>
+      <div class="headRight">
+        <div class="headButtons">
+          <a class="navIcon" href="index.html" title="Live" aria-label="Live">🏐</a>
+          <a class="navIcon" href="dagens_kamper.html" title="Dagens kamper" aria-label="Dagens kamper">📅</a>
+          <a class="navIcon" href="lag.html" title="Lag" aria-label="Lag">⭐</a>
+          <a class="navIcon" href="spiller_liste.html" title="Spillere" aria-label="Spillere">👤</a>
+          <button id="themeToggle" class="themeToggle" type="button" aria-label="Bytt tema" title="Bytt dag/natt">🌙</button>
+        </div>
+        <div id="lastUpdated" class="lastUpdated"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div id="count" class="count">Laster spillere …</div>
+      <input id="search" class="search" type="search" placeholder="Søk spiller eller klubb" />
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none;"></div>
+  </main>
+
+  <script>
+    const PLAYERS_API_URL = "https://volleyball.ronesse.no/players?limit=1000&offset=0";
+    const TEAMS_API_URL = "https://volleyball.ronesse.no/teams?limit=1000&offset=0";
+    const EVENTS_API_URL = "https://volleyball.ronesse.no/events";
+    const PLAYER_IMG_BASE = "https://volleyball.ronesse.no/img/players";
+    const TEAM_IMG_BASE = "https://volleyball.ronesse.no/img/teams";
+    const THEME_KEY = "volley_theme_v1";
+
+    let allRows = [];
+    const summaryCache = new Map();
+
+    function loadTheme(){
+      try { return localStorage.getItem(THEME_KEY) || ""; }
+      catch { return ""; }
+    }
+
+    function saveTheme(theme){
+      try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    }
+
+    function applyTheme(theme){
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      document.getElementById("themeToggle").textContent = dark ? "☀️" : "🌙";
+    }
+
+    function initTheme(){
+      const saved = loadTheme();
+      if (saved === "dark" || saved === "light"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme(){
+      const next = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      saveTheme(next);
+    }
+
+    function setLastUpdated(text){
+      document.getElementById("lastUpdated").textContent = text;
+    }
+
+    async function getJson(url){
+      const res = await fetch(url, {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    function normalizeText(s){
+      return String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function isNorwegian(player){
+      const nat = normalizeText(player?.nationality || "");
+      return nat.includes("norge") || nat.includes("norway") || nat === "norsk";
+    }
+
+    function toNumber(value){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function playerImageCandidates(playerId){
+      return [
+        `${PLAYER_IMG_BASE}/${playerId}.jpg`,
+        `${PLAYER_IMG_BASE}/${playerId}.png`,
+        `${PLAYER_IMG_BASE}/${playerId}.jpeg`,
+        `${PLAYER_IMG_BASE}/${playerId}.webp`
+      ];
+    }
+
+    function createPlayerPhoto(player){
+      const wrap = document.createElement("div");
+      wrap.className = "photoWrap";
+
+      const fallback = () => {
+        wrap.innerHTML = `<div class="photoFallback">${String(player.name || "?").slice(0,1).toUpperCase()}</div>`;
+      };
+
+      const candidates = playerImageCandidates(player.id);
+      let idx = 0;
+
+      const img = document.createElement("img");
+      img.alt = player.name || "Spiller";
+      img.loading = "lazy";
+      img.onerror = () => {
+        idx += 1;
+        if (idx < candidates.length) img.src = candidates[idx];
+        else fallback();
+      };
+      img.src = candidates[0];
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function createTeamLogo(sofaTeamId, fallbackText){
+      const wrap = document.createElement("div");
+      wrap.className = "clubLogo";
+
+      if (!sofaTeamId){
+        wrap.innerHTML = `<div class="clubFallback">${fallbackText}</div>`;
+        return wrap;
+      }
+
+      const img = document.createElement("img");
+      img.alt = "Klubblogo";
+      img.loading = "lazy";
+      img.src = `${TEAM_IMG_BASE}/${sofaTeamId}.png`;
+      img.onerror = () => {
+        wrap.innerHTML = `<div class="clubFallback">${fallbackText}</div>`;
+      };
+
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    async function getAllEventsByTeamId(sofaTeamId){
+      const out = [];
+      let offset = 0;
+      const limit = 1000;
+
+      while (true){
+        const url = new URL(EVENTS_API_URL);
+        url.searchParams.set("team_id", String(sofaTeamId));
+        url.searchParams.set("limit", String(limit));
+        url.searchParams.set("offset", String(offset));
+
+        const batch = await getJson(url.toString());
+        const rows = Array.isArray(batch) ? batch : [];
+        out.push(...rows);
+
+        if (rows.length < limit) break;
+        offset += limit;
+        if (offset > 10000) break;
+      }
+
+      const seen = new Set();
+      return out.filter(ev => {
+        const id = String(ev.event_id ?? "");
+        if (!id || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    }
+
+    async function getSummary(eventId){
+      const key = String(eventId);
+      if (summaryCache.has(key)) return summaryCache.get(key);
+
+      try{
+        const data = await getJson(`https://volleyball.ronesse.no/events/${encodeURIComponent(key)}/summary`);
+        summaryCache.set(key, data);
+        return data;
+      } catch {
+        const data = null;
+        summaryCache.set(key, data);
+        return data;
+      }
+    }
+
+    function extractPlayerLine(summaryPayload, playerName){
+      const normalizedPlayer = normalizeText(playerName);
+      if (!normalizedPlayer) return "";
+
+      if (summaryPayload?.summary_html){
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(summaryPayload.summary_html, "text/html");
+        const items = Array.from(doc.querySelectorAll("li")).map(li => li.textContent?.trim() || "");
+        const match = items.find(text => normalizeText(text).includes(normalizedPlayer));
+        if (match) return match;
+      }
+
+      if (summaryPayload?.summary){
+        const lines = String(summaryPayload.summary)
+          .split("\n")
+          .map(s => s.trim())
+          .filter(Boolean);
+        const match = lines.find(text => normalizeText(text).includes(normalizedPlayer));
+        if (match) return match.replace(/^•\s*/, "");
+      }
+
+      return "";
+    }
+
+    function parsePlayerLine(line){
+      const lower = normalizeText(line);
+
+      const total = toNumber((line.match(/(\d+)\s+poeng\b/i) || [])[1]);
+      const attack = toNumber((line.match(/(\d+)\s+angrepspoeng\b/i) || [])[1]);
+      const block = toNumber((line.match(/(\d+)\s+blokkpoeng\b/i) || [])[1]);
+
+      let serve = toNumber((line.match(/(\d+)\s+ess\b/i) || [])[1]);
+      if (!serve){
+        serve = toNumber((line.match(/(\d+)\s+servepoeng\b/i) || [])[1]);
+      }
+
+      let totalSafe = total;
+      if (!totalSafe){
+        totalSafe = attack + block + serve;
+      }
+
+      return {
+        total: totalSafe,
+        attack,
+        block,
+        serve,
+        hasData: Boolean(totalSafe || attack || block || serve || lower.includes("leverte med"))
+      };
+    }
+
+    async function buildSeasonTotalsForPlayer(player, team){
+      const sofaTeamId = String(team?.sofascore_team_id || player?.sofa_team_id || "").trim();
+      if (!sofaTeamId){
+        return { total:0, attack:0, block:0, serve:0, matchedGames:0 };
+      }
+
+      const events = await getAllEventsByTeamId(sofaTeamId);
+      const finished = events
+        .filter(ev => String(ev.status_type || "").toLowerCase() === "finished")
+        .sort((a, b) => Number(b.start_ts || 0) - Number(a.start_ts || 0));
+
+      let total = 0;
+      let attack = 0;
+      let block = 0;
+      let serve = 0;
+      let matchedGames = 0;
+
+      for (const event of finished){
+        const summary = await getSummary(event.event_id);
+        if (!summary) continue;
+
+        const playerLine = extractPlayerLine(summary, player.name || "");
+        if (!playerLine) continue;
+
+        const parsed = parsePlayerLine(playerLine);
+        if (!parsed.hasData) continue;
+
+        total += parsed.total;
+        attack += parsed.attack;
+        block += parsed.block;
+        serve += parsed.serve;
+        matchedGames += 1;
+      }
+
+      return { total, attack, block, serve, matchedGames };
+    }
+
+    function renderCard(row){
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.appendChild(createPlayerPhoto(row.player));
+
+      const main = document.createElement("div");
+      main.className = "mainCol";
+
+      const topRow = document.createElement("div");
+      topRow.className = "topRow";
+
+      const info = document.createElement("div");
+      const h = document.createElement("h2");
+      h.className = "playerName";
+
+      const link = document.createElement("a");
+      link.className = "playerLink";
+      link.href =
+        `spiller.html?player_id=${encodeURIComponent(String(row.player.id ?? ""))}` +
+        `&player_name=${encodeURIComponent(String(row.player.name ?? ""))}`;
+      link.textContent = row.player.name || "Ukjent spiller";
+      h.appendChild(link);
+
+      const meta = document.createElement("div");
+      meta.className = "playerMeta";
+      meta.textContent = [
+        row.player.position || "",
+        row.player.birth_year ? `f. ${row.player.birth_year}` : "",
+        row.player.youth_club ? `Ungdomsklubb: ${row.player.youth_club}` : ""
+      ].filter(Boolean).join(" · ");
+
+      info.appendChild(h);
+      if (meta.textContent) info.appendChild(meta);
+
+      const totalBox = document.createElement("div");
+      totalBox.className = "totalBox";
+      totalBox.innerHTML = `
+        <div class="totalLabel">Totalt</div>
+        <div class="totalValue">${row.stats.total}</div>
+      `;
+
+      topRow.appendChild(info);
+      topRow.appendChild(totalBox);
+
+      const clubRow = document.createElement("div");
+      clubRow.className = "clubRow";
+      clubRow.appendChild(
+        createTeamLogo(
+          row.team?.sofascore_team_id || row.player?.sofa_team_id || "",
+          String(row.team?.name || row.player?.team_id || "?").slice(0,2).toUpperCase()
+        )
+      );
+
+      const clubText = document.createElement("div");
+      clubText.innerHTML = `
+        <div class="clubName">${row.team?.name || "Ukjent klubb"}</div>
+        <div class="clubMeta">
+          ${(row.team?.country || "")}${row.team?.league ? ` · ${row.team.league}` : ""}
+        </div>
+      `;
+      clubRow.appendChild(clubText);
+
+      const statsRow = document.createElement("div");
+      statsRow.className = "statsRow";
+      statsRow.innerHTML = `
+        <div class="statBox">
+          <div class="statLabel">Totalt</div>
+          <div class="statValue">${row.stats.total}</div>
+        </div>
+        <div class="statBox">
+          <div class="statLabel">Angrep</div>
+          <div class="statValue">${row.stats.attack}</div>
+        </div>
+        <div class="statBox">
+          <div class="statLabel">Blokk</div>
+          <div class="statValue">${row.stats.block}</div>
+        </div>
+        <div class="statBox">
+          <div class="statLabel">Serve</div>
+          <div class="statValue">${row.stats.serve}</div>
+        </div>
+      `;
+
+      const note = document.createElement("div");
+      note.className = "smallNote";
+      note.textContent = `Kamper med funnet spillerlinje: ${row.stats.matchedGames}`;
+
+      main.appendChild(topRow);
+      main.appendChild(clubRow);
+      main.appendChild(statsRow);
+      main.appendChild(note);
+
+      card.appendChild(main);
+      return card;
+    }
+
+    function renderList(rows){
+      const grid = document.getElementById("grid");
+      const empty = document.getElementById("empty");
+      const count = document.getElementById("count");
+      const q = normalizeText(document.getElementById("search").value);
+
+      const filtered = rows.filter(row => {
+        if (!q) return true;
+        const hay = normalizeText(
+          `${row.player?.name || ""} ${row.team?.name || ""} ${row.team?.country || ""} ${row.team?.league || ""}`
+        );
+        return hay.includes(q);
+      });
+
+      grid.innerHTML = "";
+      count.textContent = `${filtered.length} spillere`;
+
+      if (!filtered.length){
+        empty.style.display = "block";
+        empty.textContent = "Ingen spillere funnet.";
+        return;
+      }
+
+      empty.style.display = "none";
+      filtered.forEach(row => grid.appendChild(renderCard(row)));
+    }
+
+    async function refresh(){
+      try{
+        const [players, teams] = await Promise.all([
+          getJson(PLAYERS_API_URL),
+          getJson(TEAMS_API_URL)
+        ]);
+
+        const teamMap = new Map((Array.isArray(teams) ? teams : []).map(team => [String(team.id), team]));
+
+        const abroadPlayers = (Array.isArray(players) ? players : [])
+          .filter(player => isNorwegian(player))
+          .filter(player => {
+            const team = teamMap.get(String(player.team_id ?? ""));
+            return team && String(team.group_type || "").toLowerCase() === "abroad";
+          });
+
+        const rows = [];
+        for (const player of abroadPlayers){
+          const team = teamMap.get(String(player.team_id ?? "")) || null;
+          const stats = await buildSeasonTotalsForPlayer(player, team);
+          rows.push({ player, team, stats });
+        }
+
+        allRows = rows.sort((a, b) => {
+          if (b.stats.total !== a.stats.total) return b.stats.total - a.stats.total;
+          if (b.stats.attack !== a.stats.attack) return b.stats.attack - a.stats.attack;
+          return String(a.player?.name || "").localeCompare(String(b.player?.name || ""), "no");
+        });
+
+        renderList(allRows);
+
+        setLastUpdated(
+          `Oppdatert ${new Date().toLocaleTimeString("no-NO", {
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit"
+          })}`
+        );
+      } catch (err){
+        document.getElementById("grid").innerHTML = "";
+        const empty = document.getElementById("empty");
+        empty.style.display = "block";
+        empty.textContent = `Kunne ikke hente spillerliste (${err.message}).`;
+        document.getElementById("count").textContent = "Feil";
+        setLastUpdated(`Feil ${new Date().toLocaleTimeString("no-NO", { hour:"2-digit", minute:"2-digit" })}`);
+      }
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    document.getElementById("search").addEventListener("input", () => renderList(allRows));
+
+    initTheme();
+    refresh();
+  </script>
+</body>
+</html>
